@@ -10,18 +10,38 @@ pub struct Cli {
     pub list: bool,
 
     /// Add a new todo item
-    #[arg(short, long, value_name = "TEXT", num_args = 1.., value_delimiter = ' ')]
+    #[arg(short = 'a', long, value_name = "TEXT", num_args = 1.., value_delimiter = ' ')]
     pub add: Option<Vec<String>>,
 
-    /// Topic for the new todo item
-    #[arg(short, long, value_name = "TOPIC", requires = "add")]
+    /// Topic for the new todo item (requires --add)
+    #[arg(short = 't', long, value_name = "TOPIC", requires = "add")]
     pub topic: Option<String>,
 
-    // Print out all the todos into console
-    #[arg(short, long)]
+    /// Priority for the todo (requires --add)
+    #[arg(short = 'P', long, value_name = "PRIORITY", requires = "add")]
+    pub priority: Option<String>,
+
+    /// Print all todos to the console
+    #[arg(short = 'p', long)]
     pub print: bool,
 
-    // DELETE TODO WITH -d or -delete
-    #[arg(short = 'd', long = "delete")]
-    pub delete: Option<i32>,
+    /// Delete a todo by ID
+    #[arg(short = 'r', long = "remove", value_name = "ID")]
+    pub remove: Option<i32>,
+
+    /// ID of the todo to update
+    #[arg(short = 'u', long, value_name = "ID")]
+    pub update_id: Option<i32>,
+
+    /// New status for the todo (requires --update-id)
+    #[arg(long, value_name = "STATUS", requires = "update_id")]
+    pub status: Option<String>,
+
+    /// Mark a todo as done by ID
+    #[arg(short = 'd', long = "done", value_name = "ID")]
+    pub done: Option<i32>,
+
+    /// Clear all todos
+    #[arg(short = 'c', long)]
+    pub clear: bool,
 }

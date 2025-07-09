@@ -70,7 +70,7 @@ impl DBtodo {
             "INSERT INTO todos (name, topic, text, date_added, status) 
              VALUES (?1, ?2, ?3, ?4, ?5)",
             params![
-                &todo.name,
+                &todo.priority,
                 &todo.topic,
                 &todo.text,
                 &todo.date_added,
@@ -102,7 +102,7 @@ impl DBtodo {
         let todos_iter = stmt.query_map(params![], |row| {
             Ok(Todo {
                 id: row.get(0)?,
-                name: row.get(1)?,
+                priority: row.get(1)?,
                 topic: row.get(2)?,
                 text: row.get(3)?,
                 date_added: row.get(4)?,
@@ -115,5 +115,30 @@ impl DBtodo {
             todos.push(todo.unwrap());
         }
         Ok(todos)
+    }
+
+    // UPDATE TODO STATUS
+    pub fn update_todo(&self, id: i32, status: Option<String>) -> Result<(), Box<dyn Error>> {
+        let changes = self.connection.execute(
+            "UPDATE todos SET status = ? WHERE id = ?",
+            params![status, id],
+        )?;
+        if changes > 0 {
+            println!("✅ Todo updated successfully!");
+        } else {
+            println!("❌ No todo found with id: {}", id);
+        }
+        Ok(())
+    }
+
+    // CLEAR ALL TODOS FROM DB
+    pub fn clear_all_todos(&self) -> Result<(), Box<dyn Error>> {
+        let changes = self.connection.execute("DELETE FROM todos", params![])?;
+        if changes > 0 {
+            println!("✅ All todos cleared successfully!");
+        } else {
+            println!("❌ No todos found.");
+        }
+        Ok(())
     }
 }
