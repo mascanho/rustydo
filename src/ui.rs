@@ -1,3 +1,5 @@
+use crate::App;
+use crate::data::Todo;
 use ratatui::prelude::Stylize;
 use ratatui::widgets::TableState;
 use ratatui::{
@@ -9,12 +11,8 @@ use ratatui::{
     widgets::{Block, Borders, Paragraph, Row, Table, Wrap},
 };
 
-use crate::App;
-use crate::data::Todo;
-
 pub fn draw_ui(f: &mut Frame, app: &mut App) {
     let area = f.area();
-
     if app.show_modal {
         draw_modal(f, area, app.selected_todo.as_ref().unwrap());
     } else {
@@ -34,7 +32,7 @@ pub fn draw_ui(f: &mut Frame, app: &mut App) {
         ])
         .style(
             Style::default()
-                .fg(Color::Yellow)
+                .fg(Color::Magenta)
                 .add_modifier(Modifier::BOLD),
         );
 
@@ -61,8 +59,13 @@ pub fn draw_ui(f: &mut Frame, app: &mut App) {
             ],
         )
         .header(header)
-        .block(Block::default().title("📝 TODO List").borders(Borders::ALL))
-        .highlight_style(Style::default().add_modifier(Modifier::BOLD))
+        .block(
+            Block::default()
+                .title("📝 TODO List")
+                .borders(Borders::ALL)
+                .style(Style::default().fg(Color::Magenta)),
+        )
+        .highlight_style(Style::default().bg(Color::DarkGray).fg(Color::White))
         .row_highlight_style(Style::default().add_modifier(Modifier::REVERSED))
         .column_spacing(2);
 
@@ -79,19 +82,24 @@ pub fn draw_ui(f: &mut Frame, app: &mut App) {
         );
 
         let status_line = Paragraph::new(stats_text)
-            .style(Style::default().fg(Color::Green))
-            .block(Block::default().borders(Borders::empty()));
+            .style(Style::default().fg(Color::Magenta))
+            .block(
+                Block::default()
+                    .borders(Borders::empty())
+                    .style(Style::default().fg(Color::Magenta)),
+            );
 
         f.render_widget(status_line, layout[1]);
     }
 }
 
-// MODAL
 pub fn draw_modal(f: &mut Frame, area: Rect, todo: &Todo) {
+    // Define a block for the modal with a dark background and magenta border
     let block = Block::default()
         .title("Todo Details")
         .borders(Borders::ALL)
-        .style(Style::default().bg(Color::DarkGray));
+        .style(Style::default().bg(Color::DarkGray))
+        .border_style(Style::default().fg(Color::Magenta));
 
     let area = centered_rect(60, 60, area);
     f.render_widget(block, area);
@@ -101,29 +109,51 @@ pub fn draw_modal(f: &mut Frame, area: Rect, todo: &Todo) {
         horizontal: 3,
     });
 
+    // Create styled text for the modal content
     let text = vec![
-        Line::from(vec!["ID: ".into(), todo.id.to_string().bold()]),
+        Line::from(vec![
+            "ID: ".into(),
+            todo.id.to_string().bold().fg(Color::Magenta),
+        ]),
         Line::from(""),
-        Line::from(vec!["Priority".into(), todo.priority.as_str().bold()]),
+        Line::from(vec![
+            "Priority: ".into(),
+            if todo.priority == "High" {
+                todo.priority.as_str().bold().fg(Color::Red)
+            } else if todo.priority == "Medium" {
+                todo.priority.as_str().bold().fg(Color::Yellow)
+            } else {
+                todo.priority.as_str().bold().fg(Color::Green)
+            },
+        ]),
         Line::from(""),
-        Line::from(vec!["Topic: ".into(), todo.topic.as_str().bold()]),
+        Line::from(vec![
+            "Topic: ".into(),
+            todo.topic.as_str().bold().fg(Color::Magenta),
+        ]),
         Line::from(""),
-        Line::from(vec!["Status: ".into(), todo.status.as_str().bold()]),
+        Line::from(vec![
+            "Status: ".into(),
+            todo.status.as_str().bold().fg(Color::Magenta),
+        ]),
         Line::from(""),
-        Line::from(vec!["Date Added: ".into(), todo.date_added.as_str().bold()]),
+        Line::from(vec![
+            "Date Added: ".into(),
+            todo.date_added.as_str().bold().fg(Color::Magenta),
+        ]),
         Line::from(""),
         Line::from("Description:"),
         Line::from(""),
-        Line::from(todo.text.as_str().bold()),
+        Line::from(todo.text.as_str().bold().fg(Color::Magenta)),
     ];
 
+    // Create a paragraph with the styled text
     let paragraph = Paragraph::new(text)
         .wrap(Wrap { trim: true })
         .block(Block::default());
 
     f.render_widget(paragraph, inner_area);
 }
-
 fn centered_rect(percent_x: u16, percent_y: u16, r: Rect) -> Rect {
     let popup_layout = Layout::default()
         .direction(Direction::Vertical)
@@ -155,6 +185,5 @@ pub fn calculate_stats(todos: &[Todo]) -> (usize, usize, usize, usize) {
         .count();
     let planned = todos.iter().filter(|todo| todo.status == "Planned").count();
     let backlog = todos.iter().filter(|todo| todo.status == "Backlog").count();
-
     (completed, in_progress, planned, backlog)
 }

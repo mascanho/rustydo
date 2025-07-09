@@ -91,21 +91,18 @@ impl App {
 fn main() -> Result<(), io::Error> {
     let cli = Cli::parse();
 
+    // Terminal UI mode
     if cli.list {
-        // Terminal UI mode
         enable_raw_mode()?;
         let mut stdout = io::stdout();
         execute!(stdout, EnterAlternateScreen, EnableMouseCapture)?;
-
         let backend = CrosstermBackend::new(stdout);
         let mut terminal = Terminal::new(backend)?;
-
         let todos = sample_todos();
         let mut app = App::new(todos);
 
         loop {
             terminal.draw(|f| draw_ui(f, &mut app))?;
-
             if let Event::Key(key) = event::read()? {
                 match key.code {
                     KeyCode::Char('q') => break,
@@ -136,56 +133,53 @@ fn main() -> Result<(), io::Error> {
         )?;
         terminal.show_cursor()?;
     }
-
     // Add new todo
-    if let Some(words) = cli.add {
+    else if let Some(words) = cli.add {
         let text = words.join(" ");
         match arguments::add_todo::add_todo(text, cli.topic, cli.priority) {
             Ok(_) => println!("Todo added successfully!"),
             Err(e) => eprintln!("Error adding todo: {}", e),
         }
     }
-
     // Delete todo
-    if let Some(id) = cli.remove {
+    else if let Some(id) = cli.remove {
         match arguments::delete_todo::remove_todo(id) {
             Ok(_) => println!("Todo deleted successfully!"),
             Err(e) => eprintln!("Error deleting todo: {}", e),
         }
     }
-
     // Update todo status
-    if let (Some(id), Some(status)) = (cli.update_id, cli.status) {
+    else if let (Some(id), Some(status)) = (cli.update_id, cli.status) {
         match arguments::update_todo::update_todo(id, status) {
             Ok(_) => println!("Todo updated successfully!"),
             Err(e) => eprintln!("Error updating todo: {}", e),
         }
     }
-
     // UPDATE USING SHORT FORMAT
-    if let Some(id) = cli.done {
+    else if let Some(id) = cli.done {
         match arguments::update_todo::update_todo(id, "Done".to_string()) {
             Ok(_) => println!("Todo updated successfully!"),
             Err(e) => eprintln!("Error updating todo: {}", e),
         }
     }
-
     // Clear all todos
-    if cli.clear {
+    else if cli.clear {
         match arguments::delete_todo::clear_todos() {
             Ok(_) => println!("Todos deleted successfully!"),
             Err(e) => eprintln!("Error deleting todos: {}", e),
         }
     }
-
     // Print todos
-    if cli.print {
+    else if cli.print {
         arguments::print::print_todos();
     }
-
     // Print args
-    if cli.show {
+    else if cli.show {
         args::print_args();
+    }
+    // Default behavior when no arguments are provided
+    else {
+        println!("Welcome to RustyDo! Use the -h or --help argument to see available options.");
     }
 
     Ok(())
