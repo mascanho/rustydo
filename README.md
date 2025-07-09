@@ -1,6 +1,8 @@
-# Rustydo
+<div align="center">
+  <img src="https://github.com/mascanho/rustydo/blob/master/src/images/logo.png" alt="Rustydo Logo" width="200" style="border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); margin: 20px 0;">
+  </div>
 
-![Rustydo Logo](https://raw.githubusercontent.com/placeholder/rustydo/main/logo.png)
+# RustyDo
 
 Rustydo is a powerful and intuitive command-line interface (CLI) todo application built with Rust. It allows you to manage your tasks efficiently directly from your terminal, offering both a interactive terminal user interface (TUI) and a set of commands for quick operations.
 
@@ -118,3 +120,4 @@ Contributions are welcome! Please feel free to open an issue or submit a pull re
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details. (Note: A LICENSE file is not yet present in the repository. Please create one if you intend to use this license.)
+
