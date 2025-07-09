@@ -270,6 +270,16 @@ fn main() -> Result<(), io::Error> {
         )?;
         terminal.show_cursor()?;
     }
+
+    // DELETE TODO WITH PROVIDED ID
+    if let Some(id) = cli.delete {
+        match arguments::delete_todo::remove_todo(id) {
+            Ok(_) => println!("Todo deleted successfully!"),
+            Err(e) => eprintln!("Error deleting todo: {}", e),
+        }
+    }
+
+    // PASS THE ARGUMENTS
     if let Some(words) = cli.add {
         let text = words.join(" ");
 
@@ -279,8 +289,6 @@ fn main() -> Result<(), io::Error> {
         }
     } else if cli.print {
         arguments::print::print_todos();
-    } else if !cli.list {
-        println!("Use the -l or --list argument to display the todo list in the terminal UI.");
     }
 
     Ok(())

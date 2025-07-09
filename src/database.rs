@@ -3,7 +3,6 @@ use std::error::Error;
 use directories::BaseDirs;
 use rusqlite::{Connection, Result, params};
 
-
 use crate::data::Todo;
 
 pub struct ConfigDir {
@@ -80,5 +79,41 @@ impl DBtodo {
         )?;
         println!("✅ Todo added successfully!");
         Ok(())
+    }
+
+    // DELETE TODO BASED ON ID
+    pub fn delete_todo(&self, id: i32) -> Result<(), Box<dyn Error>> {
+        let changes = self
+            .connection
+            .execute("DELETE FROM todos WHERE id = ?", params![id])?;
+
+        if changes > 0 {
+            println!("✅ Todo deleted successfully!");
+        } else {
+            println!("❌ No todo found with id: {}", id);
+        }
+
+        Ok(())
+    }
+
+    // SHOW ALL THE TODOS
+    pub fn get_todos(&self) -> Result<Vec<Todo>, Box<dyn Error>> {
+        let mut stmt = self.connection.prepare("SELECT * FROM todos")?;
+        let todos_iter = stmt.query_map(params![], |row| {
+            Ok(Todo {
+                id: row.get(0)?,
+                name: row.get(1)?,
+                topic: row.get(2)?,
+                text: row.get(3)?,
+                date_added: row.get(4)?,
+                status: row.get(5)?,
+            })
+        })?;
+
+        let mut todos: Vec<Todo> = Vec::new();
+        for todo in todos_iter {
+            todos.push(todo.unwrap());
+        }
+        Ok(todos)
     }
 }

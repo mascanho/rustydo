@@ -20,4 +20,8 @@ pub struct Cli {
     // Print out all the todos into console
     #[arg(short, long)]
     pub print: bool,
+
+    // DELETE TODO WITH -d or -delete
+    #[arg(short = 'd', long = "delete")]
+    pub delete: Option<i32>,
 }
