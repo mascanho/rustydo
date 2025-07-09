@@ -44,4 +44,8 @@ pub struct Cli {
     /// Clear all todos
     #[arg(short = 'c', long)]
     pub clear: bool,
+
+    /// Show all options
+    #[arg(short, long)]
+    pub show: bool,
 }

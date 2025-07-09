@@ -181,7 +181,10 @@ fn main() -> Result<(), io::Error> {
     // Print todos
     if cli.print {
         arguments::print::print_todos();
-    } else {
+    }
+
+    // Print args
+    if cli.show {
         args::print_args();
     }
 
