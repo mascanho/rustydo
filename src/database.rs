@@ -38,7 +38,7 @@ impl DBtodo {
 
         // Create the path to the database file
         let db_path = std::path::Path::new(&folder).join("todos.db");
-        println!("Database path: {}", db_path.display());
+        // println!("Database path: {}", db_path.display());
 
         // Check if db_path exists and is a directory
         if db_path.exists() && db_path.is_dir() {

@@ -1,4 +1,7 @@
-use arguments::models::{self, Cli};
+use arguments::{
+    delete_todo,
+    models::{self, Cli},
+};
 use clap::Parser;
 use crossterm::{
     event::{self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode},
@@ -23,6 +26,7 @@ mod args; // Print all the args available in the App so it does not clutter the 
 mod arguments;
 mod data; // DATABASE STUFF;
 mod database;
+mod modals; // All the modals logic
 mod ui; // ALL THE UI STUFF
 
 #[derive(Debug)]
@@ -31,6 +35,7 @@ pub struct App {
     pub state: TableState,
     pub show_modal: bool,
     pub selected_todo: Option<Todo>,
+    pub show_delete_confirmation: bool,
 }
 
 impl App {
@@ -42,7 +47,29 @@ impl App {
             state,
             show_modal: false,
             selected_todo: None,
+            show_delete_confirmation: false,
         }
+    }
+
+    fn delete_current_todo(&mut self) -> Result<(), Box<dyn std::error::Error>> {
+        if let Some(selected) = self.state.selected() {
+            if selected < self.todos.len() {
+                let id = self.todos[selected].id;
+                let db = database::DBtodo::new()?;
+                db.delete_todo(id as i32)?;
+
+                // Update local state
+                self.todos.remove(selected);
+
+                // Adjust selection
+                if !self.todos.is_empty() {
+                    self.state.select(Some(selected.min(self.todos.len() - 1)));
+                } else {
+                    self.state.select(None);
+                }
+            }
+        }
+        Ok(())
     }
 
     fn next(&mut self) {
@@ -105,6 +132,24 @@ fn main() -> Result<(), io::Error> {
             terminal.draw(|f| draw_ui(f, &mut app))?;
             if let Event::Key(key) = event::read()? {
                 match key.code {
+                    // Delete todo
+                    KeyCode::Char('d') => {
+                        if !app.todos.is_empty() {
+                            app.show_delete_confirmation = true;
+                        }
+                    }
+
+                    // Handle confirmation
+                    KeyCode::Char('y') if app.show_delete_confirmation => {
+                        if let Err(e) = app.delete_current_todo() {
+                            eprintln!("Error deleting todo: {}", e);
+                        }
+                        app.show_delete_confirmation = false;
+                    }
+
+                    KeyCode::Char('n') if app.show_delete_confirmation => {
+                        app.show_delete_confirmation = false;
+                    }
                     KeyCode::Char('q') => break,
                     KeyCode::Down | KeyCode::Char('j') => app.next(),
                     KeyCode::Up | KeyCode::Char('k') => app.previous(),
