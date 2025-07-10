@@ -11,17 +11,17 @@ use ratatui::{
     widgets::{Block, Borders, Paragraph, Row, Table, Wrap},
 };
 
-use crate::data::Todo;
+use crate::arguments::models::Todo;
 
 pub fn draw_todo_modal(f: &mut Frame, area: Rect, todo: &Todo) {
-    // Futuristic color palette
-    let background = Color::Rgb(15, 20, 30); // Deep space blue
-    let accent = Color::Rgb(0, 200, 255); // Cyber blue
-    let border = Color::Rgb(100, 255, 255); // Light cyan
-    let text_primary = Color::Rgb(220, 220, 220); // Off-white
-    let text_secondary = Color::Rgb(180, 180, 180); // Light gray
+    // Elegant purple color palette
+    let background = Color::Rgb(25, 15, 30); // Deep purple
+    let accent = Color::Rgb(150, 80, 220); // Vibrant purple
+    let border = Color::Rgb(180, 140, 220); // Soft lavender
+    let text_primary = Color::Rgb(230, 220, 240); // Light lavender
+    let text_secondary = Color::Rgb(200, 180, 220); // Muted lavender
 
-    // Main modal block with futuristic styling
+    // Main modal block with elegant styling
     let block = Block::default()
         .title(" TODO DETAILS ")
         .borders(Borders::ALL)
@@ -36,7 +36,7 @@ pub fn draw_todo_modal(f: &mut Frame, area: Rect, todo: &Todo) {
         horizontal: 3,
     });
 
-    // Create styled text with modern color scheme
+    // Create styled text with purple color scheme
     let text = vec![
         Line::from(vec![
             "ID: ".fg(text_secondary),
@@ -46,9 +46,9 @@ pub fn draw_todo_modal(f: &mut Frame, area: Rect, todo: &Todo) {
         Line::from(vec![
             "PRIORITY: ".fg(text_secondary),
             match todo.priority.to_lowercase().as_str() {
-                "high" => todo.priority.as_str().bold().fg(Color::Rgb(255, 50, 100)), // Neon pink-red
-                "medium" => todo.priority.as_str().bold().fg(Color::Rgb(255, 200, 0)), // Amber
-                _ => todo.priority.as_str().bold().fg(Color::Rgb(50, 255, 100)),      // Neon green
+                "high" => todo.priority.as_str().bold().fg(Color::Rgb(220, 80, 150)), // Pinkish purple
+                "medium" => todo.priority.as_str().bold().fg(Color::Rgb(180, 120, 220)), // Medium purple
+                _ => todo.priority.as_str().bold().fg(Color::Rgb(120, 80, 200)), // Deep purple
             },
         ]),
         Line::from(""),
@@ -60,10 +60,10 @@ pub fn draw_todo_modal(f: &mut Frame, area: Rect, todo: &Todo) {
         Line::from(vec![
             "STATUS: ".fg(text_secondary),
             match todo.status.as_str() {
-                "Done" | "Completed" => todo.status.as_str().bold().fg(Color::Rgb(50, 255, 100)), // Neon green
-                "In Progress" => todo.status.as_str().bold().fg(Color::Rgb(255, 200, 0)), // Amber
+                "Done" | "Completed" => todo.status.as_str().bold().fg(Color::Rgb(120, 220, 150)), // Soft green
+                "In Progress" => todo.status.as_str().bold().fg(Color::Rgb(220, 180, 100)), // Amber
                 "Planned" => todo.status.as_str().bold().fg(accent),
-                "Backlog" => todo.status.as_str().bold().fg(Color::Rgb(255, 50, 100)), // Neon pink-red
+                "Backlog" => todo.status.as_str().bold().fg(Color::Rgb(220, 100, 120)), // Soft red
                 _ => todo.status.as_str().bold().fg(accent),
             },
         ]),
@@ -104,4 +104,52 @@ pub fn centered_rect(percent_x: u16, percent_y: u16, r: Rect) -> Rect {
             Constraint::Percentage((100 - percent_x) / 2),
         ])
         .split(popup_layout[1])[1]
+}
+
+// DELETE CONFIRMATION MODAL
+pub fn draw_delete_confirmation(f: &mut Frame, area: Rect) {
+    // Purple-themed delete confirmation
+    let background = Color::Rgb(30, 15, 35); // Slightly darker purple
+    let border = Color::Rgb(200, 100, 220); // Bright purple border for warning
+    let text_primary = Color::Rgb(230, 220, 240); // Light lavender
+    let text_secondary = Color::Rgb(200, 180, 220); // Muted lavender
+
+    let block = Block::default()
+        .title(" Confirm Delete ")
+        .borders(Borders::ALL)
+        .style(Style::default().bg(background))
+        .border_style(Style::default().fg(border).add_modifier(Modifier::BOLD));
+
+    let area = centered_rect(40, 20, area);
+    f.render_widget(block, area);
+
+    let text = vec![
+        Line::from("Are you sure you want to delete this item?".fg(text_primary)),
+        Line::from(""),
+        Line::from(vec![
+            Span::styled(
+                "Y",
+                Style::default()
+                    .fg(Color::Rgb(120, 220, 150)) // Soft green
+                    .add_modifier(Modifier::BOLD),
+            ),
+            Span::from(": Yes, delete".fg(text_secondary)),
+        ]),
+        Line::from(vec![
+            Span::styled(
+                "N",
+                Style::default()
+                    .fg(Color::Rgb(220, 100, 120)) // Soft red
+                    .add_modifier(Modifier::BOLD),
+            ),
+            Span::from(": Cancel".fg(text_secondary)),
+        ]),
+    ];
+
+    let paragraph = Paragraph::new(text)
+        .alignment(Alignment::Center)
+        .wrap(Wrap { trim: true })
+        .block(Block::default().style(Style::default().bg(background)));
+
+    f.render_widget(paragraph, area);
 }

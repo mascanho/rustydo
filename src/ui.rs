@@ -1,10 +1,10 @@
 use crate::App;
-use crate::data::Todo;
-use crate::modals::{centered_rect, draw_todo_modal};
+use crate::arguments::models::Todo;
+use crate::modals::{centered_rect, draw_delete_confirmation, draw_todo_modal};
 use ratatui::layout::Alignment;
 use ratatui::prelude::Stylize;
 use ratatui::text::Span;
-use ratatui::widgets::TableState;
+use ratatui::widgets::{Padding, TableState};
 use ratatui::{
     Frame, Terminal,
     backend::CrosstermBackend,
@@ -14,16 +14,17 @@ use ratatui::{
     widgets::{Block, Borders, Paragraph, Row, Table, Wrap},
 };
 
+// MAIN UI
 pub fn draw_ui(f: &mut Frame, app: &mut App) {
     let area = f.area();
 
-    // Futuristic color palette (consistent with modal)
-    let background = Color::Rgb(15, 20, 30); // Deep space blue
-    let accent = Color::Rgb(0, 200, 255); // Cyber blue
-    let border = Color::Rgb(100, 255, 255); // Light cyan
-    let text_primary = Color::Rgb(220, 220, 220); // Off-white
-    let text_secondary = Color::Rgb(180, 180, 180); // Light gray
-    let highlight = Color::Rgb(40, 50, 60); // Slightly lighter than background
+    // Elegant purple color palette
+    let background = Color::Rgb(25, 15, 30); // Deep purple
+    let accent = Color::Rgb(150, 80, 220); // Vibrant purple
+    let border = Color::Rgb(180, 140, 220); // Soft lavender
+    let text_primary = Color::Rgb(230, 220, 240); // Light lavender
+    let text_secondary = Color::Rgb(200, 180, 220); // Muted lavender
+    let highlight = Color::Rgb(50, 30, 60); // Darker purple
 
     // Handle modal and delete confirmation states first
     if app.show_delete_confirmation {
@@ -47,9 +48,9 @@ pub fn draw_ui(f: &mut Frame, app: &mut App) {
         ])
         .split(area);
 
-    // Futuristic table header
+    // Elegant table header
     let header = Row::new(vec![
-        "ID", "PRIORITY", "TOPIC", "CONTENT", "CREATED", "STATUS",
+        "ID", "PRIORITY", "TOPIC", "TODO", "CREATED", "DUE DATE", "STATUS", "OWNER",
     ])
     .style(Style::default().fg(accent).add_modifier(Modifier::BOLD));
 
@@ -58,50 +59,61 @@ pub fn draw_ui(f: &mut Frame, app: &mut App) {
         Row::new(vec![
             todo.id.to_string().fg(text_primary),
             match todo.priority.to_lowercase().as_str() {
-                "high" => todo.priority.clone().fg(Color::Rgb(255, 50, 100)), // Neon red
-                "medium" => todo.priority.clone().fg(Color::Rgb(255, 200, 0)), // Amber
-                _ => todo.priority.clone().fg(Color::Rgb(50, 255, 100)),      // Neon green
+                "high" => todo.priority.clone().fg(Color::Rgb(220, 80, 150)), // Pinkish purple
+                "medium" => todo.priority.clone().fg(Color::Rgb(180, 120, 120)), // Medium Yellow
+                _ => todo.priority.clone().fg(Color::Rgb(120, 80, 200)),      // Deep purple
             },
             todo.topic.clone().fg(text_primary),
             todo.text.clone().fg(text_secondary),
             todo.date_added.clone().fg(text_secondary),
+            todo.due.clone().fg(text_secondary),
             match todo.status.as_str() {
-                "Done" | "Completed" => todo.status.clone().fg(Color::Rgb(50, 255, 100)), // Neon green
-                "In Progress" => todo.status.clone().fg(Color::Rgb(255, 200, 0)),         // Amber
+                "Done" | "Completed" => todo.status.clone().fg(Color::Rgb(120, 220, 150)), // Soft green
+                "In Progress" => todo.status.clone().fg(Color::Rgb(220, 180, 100)),        // Amber
                 "Planned" => todo.status.clone().fg(accent),
-                "Backlog" => todo.status.clone().fg(Color::Rgb(255, 50, 100)), // Neon red
+                "Backlog" => todo.status.clone().fg(Color::Rgb(220, 100, 120)), // Soft red
                 _ => todo.status.clone().fg(text_primary),
             },
+            todo.owner
+                .clone()
+                .fg(text_primary)
+                .style(Style::default().add_modifier(Modifier::ITALIC)),
         ])
     });
 
-    // Futuristic table styling
+    // Elegant table styling
     let table = Table::new(
         rows.collect::<Vec<_>>(),
         vec![
-            Constraint::Length(5),
-            Constraint::Length(12),
-            Constraint::Length(15),
-            Constraint::Percentage(35),
-            Constraint::Length(12),
-            Constraint::Length(10),
+            Constraint::Length(5),      // ID
+            Constraint::Length(12),     // PRIORITY
+            Constraint::Length(15),     // TOPIC
+            Constraint::Percentage(35), // TODO-Text
+            Constraint::Length(12),     // DATE-created
+            Constraint::Length(15),     // DUE
+            Constraint::Length(10),     // STATUS
+            Constraint::Length(10),     // Owner
         ],
     )
     .header(header)
     .block(
         Block::default()
-            .title(" TASK MANAGEMENT SYSTEM ")
+            .title(" RustyDO ")
             .borders(Borders::ALL)
             .border_style(Style::default().fg(border))
             .style(Style::default().bg(background)),
     )
     .highlight_style(Style::default().bg(highlight).fg(text_primary))
-    .row_highlight_style(Style::default().add_modifier(Modifier::BOLD))
+    .row_highlight_style(
+        Style::default()
+            .bg(Color::Rgb(120, 80, 190))
+            .fg(Color::Rgb(255, 255, 255)),
+    )
     .column_spacing(1);
 
     f.render_stateful_widget(table, layout[0], &mut app.state);
 
-    // Stats with futuristic styling
+    // Stats with elegant styling
     let (completed, in_progress, planned, backlog) = calculate_stats(&app.todos);
     let stats_text = format!(
         "TOTAL: {} | COMPLETED: {} | IN PROGRESS: {} | PLANNED: {} | BACKLOG: {}",
@@ -130,6 +142,7 @@ pub fn draw_ui(f: &mut Frame, app: &mut App) {
 
     f.render_widget(shortcuts, layout[2]);
 }
+
 pub fn calculate_stats(todos: &[Todo]) -> (usize, usize, usize, usize) {
     let completed = todos
         .iter()
@@ -155,43 +168,4 @@ fn get_shortcuts_text() -> Line<'static> {
         " ".into(),
         "q: Quit".into(),
     ])
-}
-
-// Delete MOdal
-fn draw_delete_confirmation(f: &mut Frame, area: Rect) {
-    let block = Block::default()
-        .title(" Confirm Delete ")
-        .borders(Borders::ALL)
-        .style(Style::default().bg(Color::DarkGray))
-        .border_style(Style::default().fg(Color::Red));
-
-    let area = centered_rect(40, 20, area);
-    f.render_widget(block, area);
-
-    let text = vec![
-        Line::from("Are you sure you want to delete this item?"),
-        Line::from(""),
-        Line::from(vec![
-            Span::styled(
-                "Y",
-                Style::default()
-                    .fg(Color::Green)
-                    .add_modifier(Modifier::BOLD),
-            ),
-            Span::from(": Yes, delete"),
-        ]),
-        Line::from(vec![
-            Span::styled(
-                "N",
-                Style::default().fg(Color::Red).add_modifier(Modifier::BOLD),
-            ),
-            Span::from(": Cancel"),
-        ]),
-    ];
-
-    let paragraph = Paragraph::new(text)
-        .alignment(Alignment::Center)
-        .wrap(Wrap { trim: true });
-
-    f.render_widget(paragraph, area);
 }

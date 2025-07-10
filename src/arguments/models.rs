@@ -1,5 +1,17 @@
 use clap::Parser;
 
+#[derive(Debug, Clone)]
+pub struct Todo {
+    pub id: usize,
+    pub priority: String,
+    pub topic: String,
+    pub text: String,
+    pub date_added: String,
+    pub status: String,
+    pub owner: String,
+    pub due: String,
+}
+
 #[derive(Debug, Parser)]
 #[command(name = "Todo App")]
 #[command(version = "1.0")]
@@ -48,4 +60,12 @@ pub struct Cli {
     /// Show all options
     #[arg(short, long)]
     pub show: bool,
+
+    /// OWNER NAME
+    #[arg(short, long, value_name = "OWNER", requires = "add")]
+    pub owner: Option<String>,
+
+    /// DUE DATE
+    #[arg(short = 'D', long, value_name = "DUE DATE", requires = "add")]
+    pub due: Option<String>,
 }

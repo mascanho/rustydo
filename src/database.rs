@@ -3,7 +3,7 @@ use std::error::Error;
 use directories::BaseDirs;
 use rusqlite::{Connection, Result, params};
 
-use crate::data::Todo;
+use crate::arguments::models::Todo;
 
 pub struct ConfigDir {
     pub config_dir: String,
@@ -56,7 +56,9 @@ impl DBtodo {
                 topic TEXT,
                 text TEXT,
                 date_added TEXT NOT NULL,
-                status TEXT NOT NULL
+                due TEXT,
+                status TEXT NOT NULL,
+                owner TEXT NOT NULL
             )",
             [],
         )?;
@@ -67,17 +69,19 @@ impl DBtodo {
     /// Adds a new todo to the database (better than standalone function)
     pub fn add_todo(&self, todo: &Todo) -> Result<(), Box<dyn Error>> {
         self.connection.execute(
-            "INSERT INTO todos (name, topic, text, date_added, status) 
-             VALUES (?1, ?2, ?3, ?4, ?5)",
+            "INSERT INTO todos (name, topic, text, date_added, due, status, owner) 
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)",
             params![
                 &todo.priority,
                 &todo.topic,
                 &todo.text,
                 &todo.date_added,
+                &todo.due,
                 &todo.status,
+                &todo.owner
             ],
         )?;
-        println!("✅ Todo added successfully!");
+        // println!("✅ Todo added successfully!");
         Ok(())
     }
 
@@ -106,7 +110,9 @@ impl DBtodo {
                 topic: row.get(2)?,
                 text: row.get(3)?,
                 date_added: row.get(4)?,
-                status: row.get(5)?,
+                due: row.get(5)?,
+                status: row.get(6)?,
+                owner: row.get(7)?,
             })
         })?;
 
@@ -136,6 +142,16 @@ impl DBtodo {
         let changes = self.connection.execute("DELETE FROM todos", params![])?;
         if changes > 0 {
             println!("✅ All todos cleared successfully!");
+        } else {
+            println!("❌ No todos found.");
+        }
+        Ok(())
+    }
+
+    pub fn flush_db(&self) -> Result<(), Box<dyn Error>> {
+        let changes = self.connection.execute("DELETE FROM todos", params![])?;
+        if changes > 0 {
+            println!("✅ Database flushed successfully!");
         } else {
             println!("❌ No todos found.");
         }

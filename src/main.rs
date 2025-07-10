@@ -1,6 +1,6 @@
 use arguments::{
     delete_todo,
-    models::{self, Cli},
+    models::{self, Cli, Todo},
 };
 use clap::Parser;
 use crossterm::{
@@ -8,7 +8,7 @@ use crossterm::{
     execute,
     terminal::{EnterAlternateScreen, LeaveAlternateScreen, disable_raw_mode, enable_raw_mode},
 };
-use data::{Todo, sample_todos};
+use data::sample_todos;
 use ratatui::prelude::Stylize;
 use ratatui::widgets::TableState;
 use ratatui::{
@@ -182,22 +182,22 @@ fn main() -> Result<(), io::Error> {
     // Add new todo
     else if let Some(words) = cli.add {
         let text = words.join(" ");
-        match arguments::add_todo::add_todo(text, cli.topic, cli.priority) {
-            Ok(_) => println!("Todo added successfully!"),
+        match arguments::add_todo::add_todo(text, cli.topic, cli.priority, cli.owner, cli.due) {
+            Ok(_) => println!("✅ Todo added successfully!"),
             Err(e) => eprintln!("Error adding todo: {}", e),
         }
     }
     // Delete todo
     else if let Some(id) = cli.remove {
         match arguments::delete_todo::remove_todo(id) {
-            Ok(_) => println!("Todo deleted successfully!"),
+            Ok(_) => println!("✅ Todo deleted successfully!"),
             Err(e) => eprintln!("Error deleting todo: {}", e),
         }
     }
     // Update todo status
     else if let (Some(id), Some(status)) = (cli.update_id, cli.status) {
         match arguments::update_todo::update_todo(id, status) {
-            Ok(_) => println!("Todo updated successfully!"),
+            Ok(_) => println!("✅ Todo updated successfully!"),
             Err(e) => eprintln!("Error updating todo: {}", e),
         }
     }
