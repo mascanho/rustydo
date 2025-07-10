@@ -127,7 +127,6 @@ pub fn draw_ui(f: &mut Frame, app: &mut App) {
         .style(Style::default().fg(accent))
         .block(
             Block::default()
-                .borders(Borders::TOP)
                 .border_style(Style::default().fg(border))
                 .style(Style::default().bg(background)),
         );
