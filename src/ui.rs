@@ -1,10 +1,12 @@
 use crate::App;
 use crate::arguments::models::Todo;
-use crate::modals::{centered_rect, draw_delete_confirmation, draw_todo_modal};
+use crate::modals::{
+    centered_rect, draw_delete_confirmation, draw_status_change_modal, draw_todo_modal,
+};
 use ratatui::layout::Alignment;
 use ratatui::prelude::Stylize;
 use ratatui::text::Span;
-use ratatui::widgets::{Padding, TableState};
+use ratatui::widgets::{Clear, Padding, TableState};
 use ratatui::{
     Frame, Terminal,
     backend::CrosstermBackend,
@@ -16,8 +18,10 @@ use ratatui::{
 
 // MAIN UI
 pub fn draw_ui(f: &mut Frame, app: &mut App) {
-    let area = f.area();
+    // Clear the entire area before rendering
+    f.render_widget(Clear, f.area());
 
+    let area = f.area();
     // Elegant purple color palette
     let background = Color::Rgb(25, 15, 30); // Deep purple
     let accent = Color::Rgb(150, 80, 220); // Vibrant purple
@@ -25,6 +29,12 @@ pub fn draw_ui(f: &mut Frame, app: &mut App) {
     let text_primary = Color::Rgb(230, 220, 240); // Light lavender
     let text_secondary = Color::Rgb(200, 180, 220); // Muted lavender
     let highlight = Color::Rgb(50, 30, 60); // Darker purple
+
+    // Handle STATUS CHANGE MODAL
+    if app.show_status_change_confirmation {
+        draw_status_change_modal(f, area);
+        return;
+    }
 
     // Handle modal and delete confirmation states first
     if app.show_delete_confirmation {
@@ -40,7 +50,6 @@ pub fn draw_ui(f: &mut Frame, app: &mut App) {
     // Main table view layout
     let layout = Layout::default()
         .direction(Direction::Vertical)
-        .margin(1)
         .constraints([
             Constraint::Min(1),    // Main table area
             Constraint::Length(3), // Stats area
@@ -133,7 +142,6 @@ pub fn draw_ui(f: &mut Frame, app: &mut App) {
         .style(Style::default().fg(accent))
         .block(
             Block::default()
-                // .borders(Borders::TOP)
                 .border_style(Style::default().fg(border))
                 .style(Style::default().bg(background)),
         );
@@ -163,7 +171,7 @@ pub fn calculate_stats(todos: &[Todo]) -> (usize, usize, usize, usize, usize) {
     (completed, in_progress, planned, pending, high)
 }
 
-// KEYWBOARD SHORTCUTS
+// KEYBOARD SHORTCUTS
 fn get_shortcuts_text() -> Line<'static> {
     Line::from(vec![
         "[ ".into(),
