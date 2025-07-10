@@ -6,7 +6,6 @@ pub struct Todo {
     pub priority: String,
     pub topic: String,
     pub text: String,
-    pub desc: String,
     pub date_added: String,
     pub status: String,
     pub owner: String,
@@ -26,11 +25,6 @@ pub struct Cli {
     #[arg(short = 'a', long, value_name = "TEXT", num_args = 1.., value_delimiter = ' ')]
     pub add: Option<Vec<String>>,
 
-    /// PASS A LONG DESCRIPTION TO THE ARGUMENT
-    /// Ownder of the todo (requires --add)
-    #[arg(short = 'w', long, value_name = "DESCRIPTION", num_args = 1.., value_delimiter = ' ', requires = "add")]
-    pub desc: Option<Vec<String>>,
-
     /// Topic for the new todo item (requires --add)
     #[arg(short = 't', long, value_name = "TOPIC", requires = "add")]
     pub topic: Option<String>,
@@ -44,8 +38,8 @@ pub struct Cli {
     pub print: bool,
 
     /// Delete a todo by ID
-    #[arg(short = 'D', long = "delete", value_name = "ID")]
-    pub delete: Option<i32>,
+    #[arg(short = 'r', long = "remove", value_name = "ID")]
+    pub remove: Option<i32>,
 
     /// ID of the todo to update
     #[arg(short = 'u', long, value_name = "ID")]
@@ -56,7 +50,7 @@ pub struct Cli {
     pub status: Option<String>,
 
     /// Mark a todo as done by ID
-    #[arg(short = 'C', long = "done", value_name = "ID")]
+    #[arg(short = 'd', long = "done", value_name = "ID")]
     pub done: Option<i32>,
 
     /// Clear all todos
@@ -72,6 +66,6 @@ pub struct Cli {
     pub owner: Option<String>,
 
     /// DUE DATE
-    #[arg(short = 'd', long, value_name = "DUE DATE", requires = "add")]
+    #[arg(short = 'D', long, value_name = "DUE DATE", requires = "add")]
     pub due: Option<String>,
 }

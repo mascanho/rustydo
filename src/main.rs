@@ -182,15 +182,13 @@ fn main() -> Result<(), io::Error> {
     // Add new todo
     else if let Some(words) = cli.add {
         let text = words.join(" ");
-        let desc = cli.desc.map(|desc| desc.join(" "));
-        match arguments::add_todo::add_todo(text, cli.topic, cli.priority, cli.owner, cli.due, desc)
-        {
+        match arguments::add_todo::add_todo(text, cli.topic, cli.priority, cli.owner, cli.due) {
             Ok(_) => println!("✅ Todo added successfully!"),
             Err(e) => eprintln!("Error adding todo: {}", e),
         }
     }
     // Delete todo
-    else if let Some(id) = cli.delete {
+    else if let Some(id) = cli.remove {
         match arguments::delete_todo::remove_todo(id) {
             Ok(_) => println!("✅ Todo deleted successfully!"),
             Err(e) => eprintln!("Error deleting todo: {}", e),
