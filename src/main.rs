@@ -37,7 +37,6 @@ pub struct App {
     pub show_modal: bool,
     pub selected_todo: Option<Todo>,
     pub show_delete_confirmation: bool,
-    pub show_status_change_confirmation: bool,
 }
 
 impl App {
@@ -50,7 +49,6 @@ impl App {
             show_modal: false,
             selected_todo: None,
             show_delete_confirmation: false,
-            show_status_change_confirmation: false,
         }
     }
 
@@ -64,44 +62,6 @@ impl App {
                 // Update local state
                 self.todos.remove(selected);
 
-                // Adjust selection
-                if !self.todos.is_empty() {
-                    self.state.select(Some(selected.min(self.todos.len() - 1)));
-                } else {
-                    self.state.select(None);
-                }
-            }
-        }
-        Ok(())
-    }
-
-    fn change_todo_status(&mut self, status: String) -> Result<(), Box<dyn std::error::Error>> {
-        if let Some(selected) = self.state.selected() {
-            if selected < self.todos.len() {
-                let id = self.todos[selected].id;
-                let db = database::DBtodo::new()?;
-                db.update_todo(id as i32, Some(status.to_string()))?;
-
-                // if status == "Done" {
-                //     println!("✅ Todo marked as done!");
-                //     // Update local state
-                //     self.todos[selected].status = "Done".to_string();
-                // }
-
-                // Match against the new status
-                match status.as_str() {
-                    "Done" => {
-                        println!("✅ Todo marked as done!");
-                        // Update local state
-                        self.todos[selected].status = "Done".to_string();
-                    }
-                    "Pending" => {
-                        println!("❌ Todo marked as pending!");
-                        // Update local state
-                        self.todos[selected].status = "Pending".to_string();
-                    }
-                    _ => println!("Status changed to something else!"),
-                }
                 // Adjust selection
                 if !self.todos.is_empty() {
                     self.state.select(Some(selected.min(self.todos.len() - 1)));
@@ -173,29 +133,6 @@ fn main() -> Result<(), io::Error> {
             terminal.draw(|f| draw_ui(f, &mut app))?;
             if let Event::Key(key) = event::read()? {
                 match key.code {
-                    // Change todo status
-                    KeyCode::Char('s') => {
-                        if !app.todos.is_empty() {
-                            app.show_status_change_confirmation = true;
-                        }
-                    }
-
-                    // Handle status confirmation
-                    KeyCode::Char('p') if app.show_status_change_confirmation => {
-                        if let Err(e) = app.change_todo_status("Pending".to_string()) {
-                            eprintln!("Error changing todo status: {}", e);
-                        }
-                        app.show_status_change_confirmation = false;
-                    }
-
-                    // Handle status confirmation
-                    KeyCode::Char('d') if app.show_status_change_confirmation => {
-                        if let Err(e) = app.change_todo_status("Done".to_string()) {
-                            eprintln!("Error changing todo status: {}", e);
-                        }
-                        app.show_status_change_confirmation = false;
-                    }
-
                     // Delete todo
                     KeyCode::Char('d') => {
                         if !app.todos.is_empty() {

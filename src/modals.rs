@@ -11,8 +11,6 @@ use ratatui::{
     widgets::{Block, Borders, Paragraph, Row, Table, Wrap},
 };
 
-use ratatui::widgets::Clear;
-
 use crate::arguments::models::Todo;
 
 pub fn draw_todo_modal(f: &mut Frame, area: Rect, todo: &Todo) {
@@ -155,66 +153,6 @@ pub fn draw_delete_confirmation(f: &mut Frame, area: Rect) {
                     .add_modifier(Modifier::BOLD),
             ),
             Span::from(": Cancel".fg(text_secondary)),
-        ]),
-    ];
-
-    let paragraph = Paragraph::new(text)
-        .alignment(Alignment::Center)
-        .wrap(Wrap { trim: true })
-        .block(Block::default().style(Style::default().bg(background)));
-
-    f.render_widget(paragraph, area);
-}
-
-pub fn draw_status_change_modal(f: &mut Frame, area: Rect) {
-    let background = Color::Rgb(25, 15, 30); // Deep purple
-    let border = Color::Rgb(180, 140, 220); // Soft lavender
-    let text_primary = Color::Rgb(230, 220, 240); // Light lavender
-    let text_secondary = Color::Rgb(200, 180, 220); // Muted lavender
-
-    let area = centered_rect(40, 20, area);
-    f.render_widget(Clear, area); // Clear the modal area before rendering
-
-    let block = Block::default()
-        .title(" Change Status ")
-        .borders(Borders::ALL)
-        .style(Style::default().bg(background))
-        .border_style(Style::default().fg(border).add_modifier(Modifier::BOLD));
-
-    f.render_widget(block, area);
-
-    let text = vec![
-        Line::from(Span::styled(
-            "Change TODO status",
-            Style::default().fg(text_primary),
-        )),
-        Line::from(""),
-        Line::from(vec![
-            Span::styled(
-                "p",
-                Style::default()
-                    .fg(Color::Rgb(120, 220, 150))
-                    .add_modifier(Modifier::BOLD),
-            ),
-            Span::styled(": In Progress", Style::default().fg(text_secondary)),
-        ]),
-        Line::from(vec![
-            Span::styled(
-                "g",
-                Style::default()
-                    .fg(Color::Rgb(220, 100, 120))
-                    .add_modifier(Modifier::BOLD),
-            ),
-            Span::styled(": Done", Style::default().fg(text_secondary)),
-        ]),
-        Line::from(vec![
-            Span::styled(
-                "p",
-                Style::default()
-                    .fg(Color::Rgb(220, 100, 120))
-                    .add_modifier(Modifier::BOLD),
-            ),
-            Span::styled(": Pending", Style::default().fg(text_secondary)),
         ]),
     ];
 
