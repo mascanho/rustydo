@@ -40,7 +40,6 @@ pub fn draw_ui(f: &mut Frame, app: &mut App) {
     // Main table view layout
     let layout = Layout::default()
         .direction(Direction::Vertical)
-        .margin(1)
         .constraints([
             Constraint::Min(1),    // Main table area
             Constraint::Length(3), // Stats area
