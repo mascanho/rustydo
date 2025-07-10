@@ -55,6 +55,7 @@ impl DBtodo {
                 name TEXT NOT NULL,
                 topic TEXT,
                 text TEXT,
+                desc TEXT,
                 date_added TEXT NOT NULL,
                 due TEXT,
                 status TEXT NOT NULL,
@@ -69,12 +70,13 @@ impl DBtodo {
     /// Adds a new todo to the database (better than standalone function)
     pub fn add_todo(&self, todo: &Todo) -> Result<(), Box<dyn Error>> {
         self.connection.execute(
-            "INSERT INTO todos (name, topic, text, date_added, due, status, owner) 
-             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)",
+            "INSERT INTO todos (name, topic, text, desc, date_added, due, status, owner) 
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)",
             params![
                 &todo.priority,
                 &todo.topic,
                 &todo.text,
+                &todo.desc,
                 &todo.date_added,
                 &todo.due,
                 &todo.status,
@@ -109,10 +111,11 @@ impl DBtodo {
                 priority: row.get(1)?,
                 topic: row.get(2)?,
                 text: row.get(3)?,
-                date_added: row.get(4)?,
-                due: row.get(5)?,
-                status: row.get(6)?,
-                owner: row.get(7)?,
+                desc: row.get(4)?,
+                date_added: row.get(5)?,
+                due: row.get(6)?,
+                status: row.get(7)?,
+                owner: row.get(8)?,
             })
         })?;
 

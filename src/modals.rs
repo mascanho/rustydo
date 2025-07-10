@@ -63,7 +63,7 @@ pub fn draw_todo_modal(f: &mut Frame, area: Rect, todo: &Todo) {
                 "Done" | "Completed" => todo.status.as_str().bold().fg(Color::Rgb(120, 220, 150)), // Soft green
                 "In Progress" => todo.status.as_str().bold().fg(Color::Rgb(220, 180, 100)), // Amber
                 "Planned" => todo.status.as_str().bold().fg(accent),
-                "Backlog" => todo.status.as_str().bold().fg(Color::Rgb(220, 100, 120)), // Soft red
+                "Pending" => todo.status.as_str().bold().fg(Color::Rgb(220, 100, 120)), // Soft red
                 _ => todo.status.as_str().bold().fg(accent),
             },
         ]),
@@ -73,9 +73,19 @@ pub fn draw_todo_modal(f: &mut Frame, area: Rect, todo: &Todo) {
             todo.date_added.as_str().bold().fg(text_primary),
         ]),
         Line::from(""),
-        Line::from("DESCRIPTION:".fg(text_secondary)),
+        Line::from(vec![
+            "DUE DATE".fg(text_secondary),
+            todo.due.as_str().bold().fg(text_primary),
+        ]),
         Line::from(""),
-        Line::from(todo.text.as_str().fg(text_primary)),
+        Line::from(vec![
+            "TODO: ".fg(text_secondary),
+            todo.text.as_str().bold().fg(text_primary),
+        ]),
+        Line::from(""),
+        Line::from("DESCRIPTION".fg(text_secondary)),
+        Line::from(""),
+        Line::from(todo.desc.as_str().fg(text_primary)),
     ];
 
     // Paragraph with subtle styling

@@ -61,17 +61,21 @@ pub fn draw_ui(f: &mut Frame, app: &mut App) {
             match todo.priority.to_lowercase().as_str() {
                 "high" => todo.priority.clone().fg(Color::Rgb(220, 80, 150)), // Pinkish purple
                 "medium" => todo.priority.clone().fg(Color::Rgb(180, 120, 120)), // Medium Yellow
-                _ => todo.priority.clone().fg(Color::Rgb(120, 80, 200)),      // Deep purple
+                "urgent" => todo.priority.clone().fg(Color::Rgb(120, 80, 200)),
+                "low" => todo.priority.clone().fg(Color::Rgb(0, 255, 0)),
+                _ => todo.priority.clone().fg(Color::Rgb(120, 80, 200)), // Deep purple
             },
             todo.topic.clone().fg(text_primary),
-            todo.text.clone().fg(text_secondary),
+            format!("{}          ", todo.text)
+                .clone()
+                .fg(text_secondary),
             todo.date_added.clone().fg(text_secondary),
             todo.due.clone().fg(text_secondary),
             match todo.status.as_str() {
                 "Done" | "Completed" => todo.status.clone().fg(Color::Rgb(120, 220, 150)), // Soft green
                 "In Progress" => todo.status.clone().fg(Color::Rgb(220, 180, 100)),        // Amber
                 "Planned" => todo.status.clone().fg(accent),
-                "Backlog" => todo.status.clone().fg(Color::Rgb(220, 100, 120)), // Soft red
+                "Pending" => todo.status.clone().fg(Color::Rgb(220, 100, 120)), // Soft red
                 _ => todo.status.clone().fg(text_primary),
             },
             todo.owner
@@ -86,9 +90,9 @@ pub fn draw_ui(f: &mut Frame, app: &mut App) {
         rows.collect::<Vec<_>>(),
         vec![
             Constraint::Length(5),      // ID
-            Constraint::Length(12),     // PRIORITY
-            Constraint::Length(15),     // TOPIC
-            Constraint::Percentage(35), // TODO-Text
+            Constraint::Length(10),     // PRIORITY
+            Constraint::Length(12),     // TOPIC
+            Constraint::Percentage(45), // TODO-Text
             Constraint::Length(12),     // DATE-created
             Constraint::Length(15),     // DUE
             Constraint::Length(10),     // STATUS
@@ -114,21 +118,22 @@ pub fn draw_ui(f: &mut Frame, app: &mut App) {
     f.render_stateful_widget(table, layout[0], &mut app.state);
 
     // Stats with elegant styling
-    let (completed, in_progress, planned, backlog) = calculate_stats(&app.todos);
+    let (completed, in_progress, planned, pending, high) = calculate_stats(&app.todos);
     let stats_text = format!(
-        "TOTAL: {} | COMPLETED: {} | IN PROGRESS: {} | PLANNED: {} | BACKLOG: {}",
+        "TOTAL: {} | COMPLETED: {} | IN PROGRESS: {} | PLANNED: {} | PENDING: {} | HIGH: {}",
         app.todos.len(),
         completed,
         in_progress,
         planned,
-        backlog
+        pending,
+        high
     );
 
     let status_line = Paragraph::new(stats_text)
         .style(Style::default().fg(accent))
         .block(
             Block::default()
-                .borders(Borders::TOP)
+                // .borders(Borders::TOP)
                 .border_style(Style::default().fg(border))
                 .style(Style::default().bg(background)),
         );
@@ -143,7 +148,7 @@ pub fn draw_ui(f: &mut Frame, app: &mut App) {
     f.render_widget(shortcuts, layout[2]);
 }
 
-pub fn calculate_stats(todos: &[Todo]) -> (usize, usize, usize, usize) {
+pub fn calculate_stats(todos: &[Todo]) -> (usize, usize, usize, usize, usize) {
     let completed = todos
         .iter()
         .filter(|todo| todo.status == "Completed")
@@ -153,19 +158,29 @@ pub fn calculate_stats(todos: &[Todo]) -> (usize, usize, usize, usize) {
         .filter(|todo| todo.status == "In Progress")
         .count();
     let planned = todos.iter().filter(|todo| todo.status == "Planned").count();
-    let backlog = todos.iter().filter(|todo| todo.status == "Backlog").count();
-    (completed, in_progress, planned, backlog)
+    let pending = todos.iter().filter(|todo| todo.status == "Pending").count();
+    let high = todos.iter().filter(|todo| todo.priority == "High").count();
+    (completed, in_progress, planned, pending, high)
 }
 
 // KEYWBOARD SHORTCUTS
 fn get_shortcuts_text() -> Line<'static> {
     Line::from(vec![
+        "[ ".into(),
         "↑/↓: Navigate".into(),
+        " ]".into(),
         " ".into(),
+        "[ ".into(),
         "Enter: View".into(),
         " ".into(),
-        "d: Delete".into(),
+        "]".into(),
         " ".into(),
+        "[ ".into(),
+        "d: Delete".into(),
+        " ]".into(),
+        " ".into(),
+        "[ ".into(),
         "q: Quit".into(),
+        " ]".into(),
     ])
 }
