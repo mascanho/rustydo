@@ -17,18 +17,26 @@ use ratatui::{
 pub fn draw_ui(f: &mut Frame, app: &mut App) {
     let area = f.area();
 
-    // Handle modal and delete confirmation states first (highest priority)
+    // Futuristic color palette (consistent with modal)
+    let background = Color::Rgb(15, 20, 30); // Deep space blue
+    let accent = Color::Rgb(0, 200, 255); // Cyber blue
+    let border = Color::Rgb(100, 255, 255); // Light cyan
+    let text_primary = Color::Rgb(220, 220, 220); // Off-white
+    let text_secondary = Color::Rgb(180, 180, 180); // Light gray
+    let highlight = Color::Rgb(40, 50, 60); // Slightly lighter than background
+
+    // Handle modal and delete confirmation states first
     if app.show_delete_confirmation {
         draw_delete_confirmation(f, area);
-        return; // Early return to prevent drawing other UI elements
+        return;
     }
 
     if app.show_modal {
         draw_todo_modal(f, area, app.selected_todo.as_ref().unwrap());
-        return; // Early return to prevent drawing other UI elements
+        return;
     }
 
-    // Main table view (only reached if neither modal nor confirmation is showing)
+    // Main table view layout
     let layout = Layout::default()
         .direction(Direction::Vertical)
         .margin(1)
@@ -39,36 +47,40 @@ pub fn draw_ui(f: &mut Frame, app: &mut App) {
         ])
         .split(area);
 
+    // Futuristic table header
     let header = Row::new(vec![
-        "ID",
-        "Priority",
-        "Topic",
-        "Text",
-        "Date Added",
-        "Status",
+        "ID", "PRIORITY", "TOPIC", "CONTENT", "CREATED", "STATUS",
     ])
-    .style(
-        Style::default()
-            .fg(Color::Blue)
-            .add_modifier(Modifier::BOLD),
-    );
+    .style(Style::default().fg(accent).add_modifier(Modifier::BOLD));
 
+    // Table rows with status-based coloring
     let rows = app.todos.iter().map(|todo| {
         Row::new(vec![
-            todo.id.to_string(),
-            todo.priority.clone(),
-            todo.topic.clone(),
-            todo.text.clone(),
-            todo.date_added.clone(),
-            todo.status.clone(),
+            todo.id.to_string().fg(text_primary),
+            match todo.priority.to_lowercase().as_str() {
+                "high" => todo.priority.clone().fg(Color::Rgb(255, 50, 100)), // Neon red
+                "medium" => todo.priority.clone().fg(Color::Rgb(255, 200, 0)), // Amber
+                _ => todo.priority.clone().fg(Color::Rgb(50, 255, 100)),      // Neon green
+            },
+            todo.topic.clone().fg(text_primary),
+            todo.text.clone().fg(text_secondary),
+            todo.date_added.clone().fg(text_secondary),
+            match todo.status.as_str() {
+                "Done" | "Completed" => todo.status.clone().fg(Color::Rgb(50, 255, 100)), // Neon green
+                "In Progress" => todo.status.clone().fg(Color::Rgb(255, 200, 0)),         // Amber
+                "Planned" => todo.status.clone().fg(accent),
+                "Backlog" => todo.status.clone().fg(Color::Rgb(255, 50, 100)), // Neon red
+                _ => todo.status.clone().fg(text_primary),
+            },
         ])
     });
 
+    // Futuristic table styling
     let table = Table::new(
         rows.collect::<Vec<_>>(),
         vec![
             Constraint::Length(5),
-            Constraint::Length(20),
+            Constraint::Length(12),
             Constraint::Length(15),
             Constraint::Percentage(35),
             Constraint::Length(12),
@@ -78,19 +90,21 @@ pub fn draw_ui(f: &mut Frame, app: &mut App) {
     .header(header)
     .block(
         Block::default()
-            .title("📝 TODO List")
+            .title(" TASK MANAGEMENT SYSTEM ")
             .borders(Borders::ALL)
-            .style(Style::default().fg(Color::Magenta)),
+            .border_style(Style::default().fg(border))
+            .style(Style::default().bg(background)),
     )
-    .highlight_style(Style::default().bg(Color::DarkGray).fg(Color::White))
-    .row_highlight_style(Style::default().add_modifier(Modifier::REVERSED))
-    .column_spacing(2);
+    .highlight_style(Style::default().bg(highlight).fg(text_primary))
+    .row_highlight_style(Style::default().add_modifier(Modifier::BOLD))
+    .column_spacing(1);
 
     f.render_stateful_widget(table, layout[0], &mut app.state);
 
+    // Stats with futuristic styling
     let (completed, in_progress, planned, backlog) = calculate_stats(&app.todos);
     let stats_text = format!(
-        "Total: {}, Completed: {}, In Progress: {}, Planned: {}, Backlog: {}",
+        "TOTAL: {} | COMPLETED: {} | IN PROGRESS: {} | PLANNED: {} | BACKLOG: {}",
         app.todos.len(),
         completed,
         in_progress,
@@ -99,22 +113,23 @@ pub fn draw_ui(f: &mut Frame, app: &mut App) {
     );
 
     let status_line = Paragraph::new(stats_text)
-        .style(Style::default().fg(Color::Magenta))
+        .style(Style::default().fg(accent))
         .block(
             Block::default()
-                .borders(Borders::empty())
-                .style(Style::default().fg(Color::Magenta)),
+                .borders(Borders::TOP)
+                .border_style(Style::default().fg(border))
+                .style(Style::default().bg(background)),
         );
 
     f.render_widget(status_line, layout[1]);
 
-    // Render shortcuts
-    let shortcuts =
-        Paragraph::new(get_shortcuts_text()).style(Style::default().fg(Color::DarkGray));
+    // Shortcuts with consistent styling
+    let shortcuts = Paragraph::new(get_shortcuts_text())
+        .style(Style::default().fg(text_secondary))
+        .block(Block::default().style(Style::default().bg(background)));
 
     f.render_widget(shortcuts, layout[2]);
 }
-
 pub fn calculate_stats(todos: &[Todo]) -> (usize, usize, usize, usize) {
     let completed = todos
         .iter()

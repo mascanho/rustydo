@@ -24,6 +24,7 @@ use ui::{calculate_stats, draw_ui};
 
 mod args; // Print all the args available in the App so it does not clutter the main.rs
 mod arguments;
+mod colors;
 mod data; // DATABASE STUFF;
 mod database;
 mod modals; // All the modals logic

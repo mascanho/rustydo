@@ -14,12 +14,19 @@ use ratatui::{
 use crate::data::Todo;
 
 pub fn draw_todo_modal(f: &mut Frame, area: Rect, todo: &Todo) {
-    // Define a block for the modal with a dark background and magenta border
+    // Futuristic color palette
+    let background = Color::Rgb(15, 20, 30); // Deep space blue
+    let accent = Color::Rgb(0, 200, 255); // Cyber blue
+    let border = Color::Rgb(100, 255, 255); // Light cyan
+    let text_primary = Color::Rgb(220, 220, 220); // Off-white
+    let text_secondary = Color::Rgb(180, 180, 180); // Light gray
+
+    // Main modal block with futuristic styling
     let block = Block::default()
-        .title("Todo Details")
+        .title(" TODO DETAILS ")
         .borders(Borders::ALL)
-        .style(Style::default().bg(Color::Rgb(30, 30, 40))) // Dark blue-gray
-        .border_style(Style::default().fg(Color::Magenta));
+        .border_style(Style::default().fg(border).add_modifier(Modifier::BOLD))
+        .style(Style::default().bg(background).fg(text_primary));
 
     let area = centered_rect(60, 60, area);
     f.render_widget(block, area);
@@ -29,55 +36,52 @@ pub fn draw_todo_modal(f: &mut Frame, area: Rect, todo: &Todo) {
         horizontal: 3,
     });
 
-    // Create styled text for the modal content
+    // Create styled text with modern color scheme
     let text = vec![
         Line::from(vec![
-            "ID: ".into(),
-            todo.id.to_string().bold().fg(Color::Blue),
+            "ID: ".fg(text_secondary),
+            todo.id.to_string().bold().fg(accent),
         ]),
         Line::from(""),
         Line::from(vec![
-            "Priority: ".into(),
-            if todo.priority == "High" || todo.priority == "HIGH" || todo.priority == "high" {
-                todo.priority.as_str().bold().fg(Color::Red)
-            } else if todo.priority == "Medium" {
-                todo.priority.as_str().bold().fg(Color::Yellow)
-            } else {
-                todo.priority.as_str().bold().fg(Color::Green)
+            "PRIORITY: ".fg(text_secondary),
+            match todo.priority.to_lowercase().as_str() {
+                "high" => todo.priority.as_str().bold().fg(Color::Rgb(255, 50, 100)), // Neon pink-red
+                "medium" => todo.priority.as_str().bold().fg(Color::Rgb(255, 200, 0)), // Amber
+                _ => todo.priority.as_str().bold().fg(Color::Rgb(50, 255, 100)),      // Neon green
             },
         ]),
         Line::from(""),
         Line::from(vec![
-            "Topic: ".into(),
-            todo.topic.as_str().bold().fg(Color::Blue),
+            "TOPIC: ".fg(text_secondary),
+            todo.topic.as_str().bold().fg(accent),
         ]),
         Line::from(""),
         Line::from(vec![
-            "Status: ".into(),
+            "STATUS: ".fg(text_secondary),
             match todo.status.as_str() {
-                "Done" => todo.status.as_str().bold().fg(Color::Green),
-                "Completed" => todo.status.as_str().bold().fg(Color::Green),
-                "In Progress" => todo.status.as_str().bold().fg(Color::Yellow),
-                "Planned" => todo.status.as_str().bold().fg(Color::Blue),
-                "Backlog" => todo.status.as_str().bold().fg(Color::Red),
-                _ => todo.status.as_str().bold().fg(Color::Blue),
+                "Done" | "Completed" => todo.status.as_str().bold().fg(Color::Rgb(50, 255, 100)), // Neon green
+                "In Progress" => todo.status.as_str().bold().fg(Color::Rgb(255, 200, 0)), // Amber
+                "Planned" => todo.status.as_str().bold().fg(accent),
+                "Backlog" => todo.status.as_str().bold().fg(Color::Rgb(255, 50, 100)), // Neon pink-red
+                _ => todo.status.as_str().bold().fg(accent),
             },
         ]),
         Line::from(""),
         Line::from(vec![
-            "Date Added: ".into(),
-            todo.date_added.as_str().bold().fg(Color::Blue),
+            "CREATED: ".fg(text_secondary),
+            todo.date_added.as_str().bold().fg(text_primary),
         ]),
         Line::from(""),
-        Line::from("Description:"),
+        Line::from("DESCRIPTION:".fg(text_secondary)),
         Line::from(""),
-        Line::from(todo.text.as_str().bold().fg(Color::Blue)),
+        Line::from(todo.text.as_str().fg(text_primary)),
     ];
 
-    // Create a paragraph with the styled text
+    // Paragraph with subtle styling
     let paragraph = Paragraph::new(text)
         .wrap(Wrap { trim: true })
-        .block(Block::default());
+        .block(Block::default().style(Style::default().bg(background)));
 
     f.render_widget(paragraph, inner_area);
 }
