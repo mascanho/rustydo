@@ -70,7 +70,7 @@ pub fn draw_ui(f: &mut Frame, app: &mut App) {
                 "Done" | "Completed" => todo.status.clone().fg(Color::Rgb(120, 220, 150)), // Soft green
                 "In Progress" => todo.status.clone().fg(Color::Rgb(220, 180, 100)),        // Amber
                 "Planned" => todo.status.clone().fg(accent),
-                "Backlog" => todo.status.clone().fg(Color::Rgb(220, 100, 120)), // Soft red
+                "Pending" => todo.status.clone().fg(Color::Rgb(220, 100, 120)), // Soft red
                 _ => todo.status.clone().fg(text_primary),
             },
             todo.owner
@@ -113,23 +113,12 @@ pub fn draw_ui(f: &mut Frame, app: &mut App) {
     f.render_stateful_widget(table, layout[0], &mut app.state);
 
     // Stats with elegant styling
-    let (completed, in_progress, planned, backlog) = calculate_stats(&app.todos);
-    let stats_text = format!(
-        "TOTAL: {} | COMPLETED: {} | IN PROGRESS: {} | PLANNED: {} | BACKLOG: {}",
-        app.todos.len(),
-        completed,
-        in_progress,
-        planned,
-        backlog
+    let stats_spans = calculate_stats(&app.todos);
+    let status_line = Paragraph::new(Line::from(stats_spans)).block(
+        Block::default()
+            .border_style(Style::default().fg(border))
+            .style(Style::default().bg(background)),
     );
-
-    let status_line = Paragraph::new(stats_text)
-        .style(Style::default().fg(accent))
-        .block(
-            Block::default()
-                .border_style(Style::default().fg(border))
-                .style(Style::default().bg(background)),
-        );
 
     f.render_widget(status_line, layout[1]);
 
@@ -141,18 +130,39 @@ pub fn draw_ui(f: &mut Frame, app: &mut App) {
     f.render_widget(shortcuts, layout[2]);
 }
 
-pub fn calculate_stats(todos: &[Todo]) -> (usize, usize, usize, usize) {
-    let completed = todos
-        .iter()
-        .filter(|todo| todo.status == "Completed")
-        .count();
-    let in_progress = todos
-        .iter()
-        .filter(|todo| todo.status == "In Progress")
-        .count();
-    let planned = todos.iter().filter(|todo| todo.status == "Planned").count();
-    let backlog = todos.iter().filter(|todo| todo.status == "Backlog").count();
-    (completed, in_progress, planned, backlog)
+pub fn calculate_stats(todos: &[Todo]) -> Vec<Span<'static>> {
+    let completed = todos.iter().filter(|t| t.status == "Completed").count();
+    let in_progress = todos.iter().filter(|t| t.status == "In Progress").count();
+    let planned = todos.iter().filter(|t| t.status == "Planned").count();
+    let pending = todos.iter().filter(|t| t.status == "Pending").count();
+
+    vec![
+        Span::raw("TOTAL: "),
+        Span::styled(
+            todos.len().to_string(),
+            Style::default().fg(Color::Rgb(150, 80, 220)), // Purple
+        ),
+        Span::raw(" | COMPLETED: "),
+        Span::styled(
+            completed.to_string(),
+            Style::default().fg(Color::Rgb(120, 220, 150)), // Green
+        ),
+        Span::raw(" | IN PROGRESS: "),
+        Span::styled(
+            in_progress.to_string(),
+            Style::default().fg(Color::Rgb(220, 180, 100)), // Amber
+        ),
+        Span::raw(" | PLANNED: "),
+        Span::styled(
+            planned.to_string(),
+            Style::default().fg(Color::Rgb(180, 140, 220)), // Lavender
+        ),
+        Span::raw(" | PENDING: "),
+        Span::styled(
+            pending.to_string(),
+            Style::default().fg(Color::Rgb(220, 100, 120)), // Red
+        ),
+    ]
 }
 
 // KEYWBOARD SHORTCUTS
@@ -167,3 +177,4 @@ fn get_shortcuts_text() -> Line<'static> {
         "q: Quit".into(),
     ])
 }
+
