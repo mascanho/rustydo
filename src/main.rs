@@ -155,8 +155,11 @@ async fn main() -> Result<(), io::Error> {
 
     let cli = Cli::parse();
 
-    // Terminal UI mode
-    if cli.list {
+    // Check if no arguments were provided
+    let no_args_provided = std::env::args().count() == 1;
+
+    // Terminal UI mode (default when no args provided or when --list is explicitly set)
+    if cli.list || no_args_provided {
         enable_raw_mode()?;
         let mut stdout = io::stdout();
         execute!(stdout, EnterAlternateScreen, EnableMouseCapture)?;
@@ -312,10 +315,6 @@ async fn main() -> Result<(), io::Error> {
     // Print args
     else if cli.show {
         args::print_args();
-    }
-    // Default behavior when no arguments are provided
-    else {
-        println!("Welcome to RustyDo! Use the -h or --help argument to see available options.");
     }
 
     Ok(())
