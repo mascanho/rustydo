@@ -58,9 +58,12 @@ pub fn draw_ui(f: &mut Frame, app: &mut App) {
         Row::new(vec![
             todo.id.to_string().fg(text_primary),
             match todo.priority.to_lowercase().as_str() {
-                "high" => todo.priority.clone().fg(Color::Rgb(220, 80, 150)), // Pinkish purple
-                "medium" => todo.priority.clone().fg(Color::Rgb(180, 120, 120)), // Medium Yellow
-                _ => todo.priority.clone().fg(Color::Rgb(120, 80, 200)),      // Deep purple
+                "high" | "High" | "HIGH" => todo.priority.clone().fg(Color::Rgb(220, 80, 150)), // Pinkish purple
+                "medium" | "Medium" | "MEDIUM" => {
+                    todo.priority.clone().fg(Color::Rgb(180, 120, 120))
+                } // Medium Yellow
+                "low" | "Low" | "LOW" => todo.priority.clone().fg(Color::Rgb(120, 80, 200)), // Deep purple
+                _ => todo.priority.clone().fg(Color::Rgb(120, 80, 200)), // Deep purple
             },
             todo.topic.clone().fg(text_primary),
             todo.text.clone().fg(text_secondary),
@@ -68,7 +71,7 @@ pub fn draw_ui(f: &mut Frame, app: &mut App) {
             todo.due.clone().fg(text_secondary),
             match todo.status.as_str() {
                 "Done" | "Completed" => todo.status.clone().fg(Color::Rgb(120, 220, 150)), // Soft green
-                "In Progress" => todo.status.clone().fg(Color::Rgb(220, 180, 100)),        // Amber
+                "Ongoing" => todo.status.clone().fg(Color::Rgb(220, 180, 100)),            // Amber
                 "Planned" => todo.status.clone().fg(accent),
                 "Pending" => todo.status.clone().fg(Color::Rgb(220, 100, 120)), // Soft red
                 _ => todo.status.clone().fg(text_primary),
@@ -131,32 +134,33 @@ pub fn draw_ui(f: &mut Frame, app: &mut App) {
 }
 
 pub fn calculate_stats(todos: &[Todo]) -> Vec<Span<'static>> {
-    let completed = todos.iter().filter(|t| t.status == "Completed").count();
-    let in_progress = todos.iter().filter(|t| t.status == "In Progress").count();
-    let planned = todos.iter().filter(|t| t.status == "Planned").count();
+    let done = todos.iter().filter(|t| t.status == "Done").count();
+    let ongoing = todos.iter().filter(|t| t.status == "Ongoing").count();
+    // let planned = todos.iter().filter(|t| t.status == "Planned").count();
     let pending = todos.iter().filter(|t| t.status == "Pending").count();
 
     vec![
+        Span::raw(" "),
         Span::raw("TOTAL: "),
         Span::styled(
             todos.len().to_string(),
             Style::default().fg(Color::Rgb(150, 80, 220)), // Purple
         ),
-        Span::raw(" | COMPLETED: "),
+        Span::raw(" | Done: "),
         Span::styled(
-            completed.to_string(),
+            done.to_string(),
             Style::default().fg(Color::Rgb(120, 220, 150)), // Green
         ),
-        Span::raw(" | IN PROGRESS: "),
+        Span::raw(" | ONGOING: "),
         Span::styled(
-            in_progress.to_string(),
+            ongoing.to_string(),
             Style::default().fg(Color::Rgb(220, 180, 100)), // Amber
         ),
-        Span::raw(" | PLANNED: "),
-        Span::styled(
-            planned.to_string(),
-            Style::default().fg(Color::Rgb(180, 140, 220)), // Lavender
-        ),
+        // Span::raw(" | PLANNED: "),
+        // Span::styled(
+        //     planned.to_string(),
+        //     Style::default().fg(Color::Rgb(180, 140, 220)), // Lavender
+        // ),
         Span::raw(" | PENDING: "),
         Span::styled(
             pending.to_string(),
@@ -168,13 +172,30 @@ pub fn calculate_stats(todos: &[Todo]) -> Vec<Span<'static>> {
 // KEYWBOARD SHORTCUTS
 fn get_shortcuts_text() -> Line<'static> {
     Line::from(vec![
+        " ".into(),
+        "[ ".into(),
         "↑/↓: Navigate".into(),
+        " ]".into(),
         " ".into(),
+        "[ ".into(),
         "Enter: View".into(),
+        " ]".into(),
         " ".into(),
+        "[ ".into(),
         "d: Delete".into(),
+        " ]".into(),
         " ".into(),
+        "[ ".into(),
+        "f: Done".into(),
+        " ] ".into(),
+        "[ ".into(),
+        "p: Pending".into(),
+        " ] ".into(),
+        "[ ".into(),
+        "o: Ongoing".into(),
+        " ] ".into(),
+        "[ ".into(),
         "q: Quit".into(),
+        " ]".into(),
     ])
 }
-

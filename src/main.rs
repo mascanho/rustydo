@@ -52,6 +52,36 @@ impl App {
         }
     }
 
+    // CHANGE TODO STATUS
+    fn change_todo_status(
+        &mut self,
+        id: i32,
+        status: String,
+    ) -> Result<(), Box<dyn std::error::Error>> {
+        // Validate selection exists
+        let selected = self.state.selected().ok_or("No todo selected")?;
+
+        // Validate selection is within bounds
+        if selected >= self.todos.len() {
+            return Err("Invalid selection".into());
+        }
+
+        // Update database
+        let db = database::DBtodo::new()?;
+        db.update_todo(id, Some(status.clone()))?;
+
+        // Update local state
+        self.todos[selected].status = status;
+
+        // Maintain selection position
+        if !self.todos.is_empty() {
+            let new_selection = selected.min(self.todos.len().saturating_sub(1));
+            self.state.select(Some(new_selection));
+        }
+
+        Ok(())
+    }
+
     fn delete_current_todo(&mut self) -> Result<(), Box<dyn std::error::Error>> {
         if let Some(selected) = self.state.selected() {
             if selected < self.todos.len() {
@@ -133,6 +163,43 @@ fn main() -> Result<(), io::Error> {
             terminal.draw(|f| draw_ui(f, &mut app))?;
             if let Event::Key(key) = event::read()? {
                 match key.code {
+                    // CHANGE TODO STATUS
+                    KeyCode::Char('p') => {
+                        if let Some(selected) = app.state.selected() {
+                            if selected < app.todos.len() {
+                                let id = app.todos[selected].id;
+                                let status = "Pending".to_string();
+                                if let Err(e) = app.change_todo_status(id as i32, status) {
+                                    eprintln!("Error updating todo status: {}", e);
+                                }
+                            }
+                        }
+                    }
+
+                    KeyCode::Char('f') => {
+                        if let Some(selected) = app.state.selected() {
+                            if selected < app.todos.len() {
+                                let id = app.todos[selected].id;
+                                let status = "Done".to_string();
+                                if let Err(e) = app.change_todo_status(id as i32, status) {
+                                    eprintln!("Error updating todo status: {}", e);
+                                }
+                            }
+                        }
+                    }
+
+                    KeyCode::Char('o') => {
+                        if let Some(selected) = app.state.selected() {
+                            if selected < app.todos.len() {
+                                let id = app.todos[selected].id;
+                                let status = "Ongoing".to_string();
+                                if let Err(e) = app.change_todo_status(id as i32, status) {
+                                    eprintln!("Error updating todo status: {}", e);
+                                }
+                            }
+                        }
+                    }
+
                     // Delete todo
                     KeyCode::Char('d') => {
                         if !app.todos.is_empty() {
@@ -140,7 +207,7 @@ fn main() -> Result<(), io::Error> {
                         }
                     }
 
-                    // Handle confirmation
+                    // Handle delete confirmation
                     KeyCode::Char('y') if app.show_delete_confirmation => {
                         if let Err(e) = app.delete_current_todo() {
                             eprintln!("Error deleting todo: {}", e);
@@ -198,16 +265,14 @@ fn main() -> Result<(), io::Error> {
     }
     // Update todo status
     else if let (Some(id), Some(status)) = (cli.update_id, cli.status) {
-        match arguments::update_todo::update_todo(id, status) {
-            Ok(_) => println!("✅ Todo updated successfully!"),
-            Err(e) => eprintln!("Error updating todo: {}", e),
+        if let Err(e) = arguments::update_todo::update_todo(id, status) {
+            eprintln!("Error updating todo: {}", e);
         }
     }
     // UPDATE USING SHORT FORMAT
     else if let Some(id) = cli.done {
-        match arguments::update_todo::update_todo(id, "Done".to_string()) {
-            Ok(_) => println!("Todo updated successfully!"),
-            Err(e) => eprintln!("Error updating todo: {}", e),
+        if let Err(e) = arguments::update_todo::update_todo(id, "Done".to_string()) {
+            eprintln!("Error updating todo: {}", e);
         }
     }
     // Clear all todos

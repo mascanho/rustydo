@@ -133,7 +133,7 @@ impl DBtodo {
             params![status, id],
         )?;
         if changes > 0 {
-            println!("✅ Todo updated successfully!");
+            return Ok(());
         } else {
             println!("❌ No todo found with id: {}", id);
         }

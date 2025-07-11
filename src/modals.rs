@@ -73,9 +73,19 @@ pub fn draw_todo_modal(f: &mut Frame, area: Rect, todo: &Todo) {
             todo.date_added.as_str().bold().fg(text_primary),
         ]),
         Line::from(""),
+        Line::from(vec![
+            "DUE: ".fg(text_secondary),
+            todo.due.as_str().bold().fg(text_primary),
+        ]),
+        Line::from(""),
+        Line::from(vec![
+            "TODO: ".fg(text_secondary),
+            todo.text.as_str().bold().fg(text_primary),
+        ]),
+        Line::from(""),
         Line::from("DESCRIPTION:".fg(text_secondary)),
         Line::from(""),
-        Line::from(todo.text.as_str().fg(text_primary)),
+        Line::from(todo.desc.as_str().fg(text_primary)),
     ];
 
     // Paragraph with subtle styling

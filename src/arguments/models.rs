@@ -36,11 +36,11 @@ pub struct Cli {
     pub topic: Option<String>,
 
     /// Priority for the todo (requires --add)
-    #[arg(short = 'P', long, value_name = "PRIORITY", requires = "add")]
+    #[arg(short = 'p', long, value_name = "PRIORITY", requires = "add")]
     pub priority: Option<String>,
 
     /// Print all todos to the console
-    #[arg(short = 'p', long)]
+    #[arg(short = 'P', long)]
     pub print: bool,
 
     /// Delete a todo by ID
