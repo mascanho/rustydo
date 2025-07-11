@@ -16,7 +16,7 @@ pub struct DBtodo {
 impl ConfigDir {
     pub fn new() -> ConfigDir {
         let base_dirs = BaseDirs::new().unwrap();
-        let config_dir = base_dirs.config_dir().join("rustdo");
+        let config_dir = base_dirs.config_dir().join("rustydo");
         ConfigDir {
             config_dir: config_dir.to_str().unwrap().to_string(),
         }
@@ -47,6 +47,16 @@ impl DBtodo {
 
         // Open or create the database file
         let connection = Connection::open(&db_path)?;
+
+        // Initialise the MODEL TABLE
+        connection.execute(
+            "CREATE TABLE IF NOT EXISTS model (
+                id INTEGER PRIMARY KEY,
+                name TEXT NOT NULL,
+                apikey TEXT NOT NULL
+            )",
+            [],
+        )?;
 
         // Initialize the table (if it doesn't exist)
         connection.execute(
