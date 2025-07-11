@@ -1,123 +1,149 @@
 <div align="center">
   <img src="https://github.com/mascanho/rustydo/blob/master/src/images/logo.png" alt="Rustydo Logo" width="200" style="border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); margin: 20px 0;">
-  </div>
+  <h1>RustyDo</h1>
+</div>
 
-# RustyDo
+**RustyDo** is a powerful and intuitive command-line (CLI) todo application built with Rust, supercharged with AI capabilities. It allows you to manage your tasks efficiently directly from your terminal, offering both an interactive terminal user interface (TUI) and a comprehensive set of commands for quick, command-line operations.
 
-Rustydo is a powerful and intuitive command-line interface (CLI) todo application built with Rust. It allows you to manage your tasks efficiently directly from your terminal, offering both a interactive terminal user interface (TUI) and a set of commands for quick operations.
+## ✨ Features
 
-## Features
+- **Interactive TUI**: A full-featured terminal UI to manage your todos with keyboard navigation.
+- **AI-Powered Suggestions**: Leverage the power of Google's Gemini to get task suggestions based on your prompts.
+- **Comprehensive Task Management**: Add, delete, and update tasks with details like topics, priorities, owners, and due dates.
+- **Flexible Commands**: Use a wide range of flags to manage your todos without ever leaving the command line.
+- **Persistent Storage**: Your todos are saved locally in a SQLite database, ensuring your data is always safe.
+- **Configuration File**: Automatically creates a configuration file to manage settings like API keys.
 
-- **Interactive TUI**: A full-featured terminal UI for managing your todos with keyboard navigation.
-- **Add Todos**: Easily add new tasks with optional topics and priorities.
-- **Delete Todos**: Remove tasks by their ID.
-- **Update Todos**: Mark tasks as done or change their status.
-- **Clear All Todos**: Clear all your tasks with a single command.
-- **List Todos**: View all your tasks in a clear, formatted list.
-- **Persistent Storage**: Your todos are saved locally using SQLite.
+## 🚀 Installation
 
-## Installation
+To install RustyDo, you need to have Rust and Cargo installed. If you don't, follow the instructions on the [official Rust website](https://www.rust-lang.org/tools/install).
 
-To install Rustydo, you need to have Rust and Cargo installed on your system. If you don't have them, you can install them by following the instructions on the [official Rust website](https://www.rust-lang.org/tools/install).
-
-Once Rust is installed, you can clone this repository and build the project:
+Once Rust is set up, clone the repository and install the application:
 
 ```bash
-git clone https://github.com/ymascanho/rustydo.git
+git clone https://github.com/mascanho/rustydo.git
 cd rustydo
 cargo install --path .
 ```
 
-This will install the `rustydo` executable to your Cargo bin directory, usually `~/.cargo/bin`.
+This will install the `rustydo` executable in your Cargo bin directory (usually `~/.cargo/bin`), making it available from anywhere in your terminal.
 
-## Usage
+## ⚙️ Configuration
 
-### Interactive Terminal UI
+The first time you run RustyDo, it will automatically create a `config.toml` file in your system's configuration directory. To use the AI features, you need to add your Google Gemini API key to this file.
 
-To launch the interactive TUI, run:
+1.  **Get your API key**: Obtain your API key from [Google AI Studio](https://aistudio.google.com/app/apikey).
+2.  **Set the key**: You can set the API key using the following command:
+    ```bash
+    rustydo --apikey YOUR_API_KEY
+    ```
+    This will securely save your key to the configuration file.
+
+## 💻 Usage
+
+### Interactive Terminal UI (TUI)
+
+Launch the interactive TUI with the `--list` or `-l` flag:
 
 ```bash
 rustydo --list
 ```
 
-In the TUI:
-- Use `Up` and `Down` arrow keys or `k` and `j` to navigate.
-- Press `Enter` to view details of a selected todo.
-- Press `Esc` to close the details modal.
-- Press `q` to quit the application.
+**Controls:**
+-   **Navigate**: `Up`/`Down` arrow keys or `k`/`j`.
+-   **View Details**: `Enter` to open the details modal for the selected todo.
+-   **Change Status**:
+    -   `p`: Mark as "Pending".
+    -   `o`: Mark as "Ongoing".
+    -   `f`: Mark as "Done".
+-   **Delete Todo**: `d` to open a confirmation dialog, then `y` to confirm or `n` to cancel.
+-   **Close Modals**: `Esc` to close any open modal.
+-   **Quit**: `q` to exit the application.
 
 ### Command-Line Operations
 
 Here are the available command-line options:
 
-#### Add a new todo
+#### 🤖 AI Commands
 
+**Get AI-powered task suggestions:**
 ```bash
-rustydo --add "Buy groceries" --topic "Shopping" --priority "High"
+rustydo --prompt "plan a marketing campaign for a new product launch"
 ```
 
-- `--add <TEXT>`: The description of your todo. (Required)
-- `--topic <TOPIC>`: Optional topic for the todo.
-- `--priority <PRIORITY>`: Optional priority (e.g., "High", "Medium", "Low").
-
-#### Delete a todo
-
+**Set your Gemini API key:**
 ```bash
-rustydo --remove <ID>
+rustydo --apikey YOUR_API_KEY
 ```
 
-- `--remove <ID>`: The ID of the todo to delete.
+#### ✅ Todo Management
 
-#### Update a todo's status
-
+**Add a new todo:**
 ```bash
-rustydo --update-id <ID> --status "Done"
+rustydo --add "Deploy the new feature to production" --desc "Ensure all tests pass" --topic "DevOps" --priority "High" --owner "Alex" --due "2024-12-31"
+```
+- `--add <TEXT>`: The description of the todo. (Required)
+- `--desc <TEXT>`: A more detailed description. (Optional)
+- `--topic <TOPIC>`: A topic for categorization. (Optional)
+- `--priority <PRIORITY>`: Priority level (e.g., "High", "Medium", "Low"). (Optional)
+- `--owner <OWNER>`: The person responsible for the task. (Optional)
+- `--due <DATE>`: A due date for the task. (Optional)
+
+**Delete a todo:**
+```bash
+rustydo --delete <ID>
 ```
 
-- `--update-id <ID>`: The ID of the todo to update.
-- `--status <STATUS>`: The new status for the todo (e.g., "Done", "Pending", "In Progress").
+**Update a todo's status:**
+```bash
+rustydo --update-id <ID> --status "Ongoing"
+```
 
-#### Mark a todo as done (shortcut)
-
+**Mark a todo as "Done" (shortcut):**
 ```bash
 rustydo --done <ID>
 ```
 
-- `--done <ID>`: The ID of the todo to mark as "Done".
-
-#### Clear all todos
-
+**Clear all todos:**
 ```bash
 rustydo --clear
 ```
 
-#### Print all todos to the console
-
+#### utility
+**Print all todos to the console:**
 ```bash
 rustydo --print
 ```
 
-#### Get help
+**Show available arguments:**
+```bash
+rustydo --show
+```
 
+**Get help:**
 ```bash
 rustydo --help
 ```
 
-## Technologies Used
+## 🛠️ Technologies Used
 
 - [Rust](https://www.rust-lang.org/)
 - [Ratatui](https://ratatui.rs/) (for the TUI)
+- [Tokio](https://tokio.rs/) (for asynchronous operations)
+- [Reqwest](https://docs.rs/reqwest/latest/reqwest/) (for HTTP requests to the Gemini API)
 - [Crossterm](https://docs.rs/crossterm/latest/crossterm/) (for terminal manipulation)
-- [Clap](https://docs.rs/clap/latest/clap/) (for command-line argument parsing)
-- [Rusqlite](https://docs.rs/rusqlite/latest/rusqlite/) (for SQLite database interaction)
+- [Clap](https://docs.rs/clap/latest/clap/) (for argument parsing)
+- [Rusqlite](https://docs.rs/rusqlite/latest/rusqlite/) (for SQLite database)
 - [Serde](https://serde.rs/) (for serialization/deserialization)
-- [Chrono](https://docs.rs/chrono/latest/chrono/) (for date and time handling)
+- [TOML](https://docs.rs/toml/latest/toml/) (for configuration file parsing)
+- [Chrono](https://docs.rs/chrono/latest/chrono/) (for date and time)
+- [Anyhow](https://docs.rs/anyhow/latest/anyhow/) (for error handling)
+- [Directories](https://docs.rs/directories/latest/directories/) (for finding config paths)
 
-## Contributing
+## 🙌 Contributing
 
-Contributions are welcome! Please feel free to open an issue or submit a pull request.
+Contributions are welcome! If you have ideas for new features or find a bug, please open an issue or submit a pull request.
 
-## License
+## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details. (Note: A LICENSE file is not yet present in the repository. Please create one if you intend to use this license.)
-
+This project is licensed under the MIT License.
