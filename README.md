@@ -23,7 +23,7 @@ To install Rustydo, you need to have Rust and Cargo installed on your system. If
 Once Rust is installed, you can clone this repository and build the project:
 
 ```bash
-git clone https://github.com/your-username/rustydo.git
+git clone https://github.com/ymascanho/rustydo.git
 cd rustydo
 cargo install --path .
 ```
