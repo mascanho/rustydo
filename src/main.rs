@@ -22,6 +22,7 @@ use ratatui::{
 use std::io;
 use ui::{calculate_stats, draw_ui};
 
+mod ai; // LLMS stuff
 mod args; // Print all the args available in the App so it does not clutter the main.rs
 mod arguments;
 mod colors;
@@ -147,7 +148,8 @@ impl App {
     }
 }
 
-fn main() -> Result<(), io::Error> {
+#[tokio::main]
+async fn main() -> Result<(), io::Error> {
     // Create the configs
     let _ = configs::AppConfigs::create_default_config();
 
@@ -249,6 +251,23 @@ fn main() -> Result<(), io::Error> {
             DisableMouseCapture
         )?;
         terminal.show_cursor()?;
+    }
+    // PROMPT GEMINI
+    else if let Some(prompt) = cli.prompt {
+        match ai::ask_gemini(prompt).await {
+            Ok(response) => println!("{}", response),
+            Err(e) => eprintln!(
+                "Error: {}. Please set an API key first using the -k flag.",
+                e
+            ),
+        }
+    }
+    // Pass the API key
+    else if let Some(key) = cli.apikey {
+        let db = database::DBtodo::new().unwrap();
+        db.set_api_credentials(Some(key)).unwrap_or_else(|e| {
+            eprintln!("Error setting API credentials: {}", e);
+        })
     }
     // Add new todo
     else if let Some(words) = cli.add {

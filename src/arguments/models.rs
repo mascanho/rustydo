@@ -74,4 +74,12 @@ pub struct Cli {
     /// DUE DATE
     #[arg(short = 'd', long, value_name = "DUE DATE", requires = "add")]
     pub due: Option<String>,
+
+    /// pass the API key credentrials
+    #[arg(short = 'k', long, value_name = "API_KEY")]
+    pub apikey: Option<String>,
+
+    /// ASK GEMINI
+    #[arg(short = 'A', long, value_name = "PROMPT")]
+    pub prompt: Option<String>,
 }

@@ -170,4 +170,31 @@ impl DBtodo {
         }
         Ok(())
     }
+
+    // SET THE API KEY CREDENTRIALS
+    pub fn set_api_credentials(&self, apikey: Option<String>) -> Result<(), Box<dyn Error>> {
+        // Always clear the table first
+        self.connection.execute("DELETE FROM model", [])?;
+
+        // Insert the new API key
+        let changes = self.connection.execute(
+            "INSERT INTO model (name, apikey) VALUES (?, ?)",
+            params!["gemini", apikey.as_deref()],
+        )?;
+
+        if changes > 0 {
+            println!("✅ API credentials set successfully!");
+        } else {
+            println!("❌ Failed to set API credentials.");
+        }
+
+        Ok(())
+    }
+
+    // GET THE API KEY CREDENTRIALS
+    pub fn get_api_credentials(&self) -> Result<String, Box<dyn Error>> {
+        let mut stmt = self.connection.prepare("SELECT apikey FROM model")?;
+        let apikey = stmt.query_row(params![], |row| row.get(0))?;
+        Ok(apikey)
+    }
 }
