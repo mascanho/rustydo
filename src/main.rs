@@ -31,6 +31,7 @@ mod data; // DATABASE STUFF;
 mod database;
 mod modals; // All the modals logic
 mod ui; // ALL THE UI STUFF
+mod xls;
 
 #[derive(Debug)]
 pub struct App {
@@ -185,7 +186,7 @@ async fn main() -> Result<(), io::Error> {
                         }
                     }
 
-                    KeyCode::Char('f') => {
+                    KeyCode::Char('d') => {
                         if let Some(selected) = app.state.selected() {
                             if selected < app.todos.len() {
                                 let id = app.todos[selected].id;
@@ -210,7 +211,7 @@ async fn main() -> Result<(), io::Error> {
                     }
 
                     // Delete todo
-                    KeyCode::Char('d') => {
+                    KeyCode::Delete => {
                         if !app.todos.is_empty() {
                             app.show_delete_confirmation = true;
                         }
@@ -255,15 +256,27 @@ async fn main() -> Result<(), io::Error> {
         )?;
         terminal.show_cursor()?;
     }
+    // Export TODOs into Excel File
+    else if cli.export {
+        let _workbook = xls::export_todos();
+    }
     // PROMPT GEMINI
     else if let Some(prompt) = cli.prompt {
         match ai::ask_gemini(prompt).await {
-            Ok(response) => println!("{}", response),
+            Ok(response) => {
+                println!("");
+                println!("🤖 {}", response);
+                println!("")
+            }
             Err(e) => eprintln!(
                 "Error: {}. Please set an API key first using the -k flag.",
                 e
             ),
         }
+    }
+    // Print version
+    else if cli.release {
+        println!("rustydo {}", env!("CARGO_PKG_VERSION"));
     }
     // Pass the API key
     else if let Some(key) = cli.apikey {
@@ -315,6 +328,16 @@ async fn main() -> Result<(), io::Error> {
     // Print args
     else if cli.show {
         args::print_args();
+    }
+    // Clear the databse
+    else if cli.flush {
+        match database::DBtodo::new() {
+            Ok(mut db) => match db.flush_db() {
+                Ok(_) => println!(" Database flushed successfully!"),
+                Err(e) => eprintln!("Error flushing database: {}", e),
+            },
+            Err(e) => eprintln!("Error creating database: {}", e),
+        }
     }
 
     Ok(())

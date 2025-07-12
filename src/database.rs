@@ -164,9 +164,13 @@ impl DBtodo {
     pub fn flush_db(&self) -> Result<(), Box<dyn Error>> {
         let changes = self.connection.execute("DELETE FROM todos", params![])?;
         if changes > 0 {
-            println!("✅ Database flushed successfully!");
+            println!("");
+            println!("✅ All todos cleared successfully!");
+            println!("");
         } else {
-            println!("❌ No todos found.");
+            println!("");
+            println!("❌ No todos found, nothing to clear");
+            println!("");
         }
         Ok(())
     }

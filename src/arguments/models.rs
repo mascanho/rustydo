@@ -22,6 +22,10 @@ pub struct Cli {
     #[arg(short, long)]
     pub list: bool,
 
+    // Export todos indo Excel file
+    #[arg(short, long)]
+    pub export: bool,
+
     /// Add a new todo item
     #[arg(short = 'a', long, value_name = "TEXT", num_args = 1.., value_delimiter = ' ')]
     pub add: Option<Vec<String>>,
@@ -82,4 +86,12 @@ pub struct Cli {
     /// ASK GEMINI
     #[arg(short = 'A', long, value_name = "PROMPT")]
     pub prompt: Option<String>,
+
+    /// Version Check
+    #[arg(short, long)]
+    pub release: bool,
+
+    /// Clear the databse
+    #[arg(short, long)]
+    pub flush: bool,
 }
