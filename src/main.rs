@@ -40,6 +40,7 @@ pub struct App {
     pub show_modal: bool,
     pub selected_todo: Option<Todo>,
     pub show_delete_confirmation: bool,
+    pub show_priority_modal: bool,
 }
 
 impl App {
@@ -52,7 +53,38 @@ impl App {
             show_modal: false,
             selected_todo: None,
             show_delete_confirmation: false,
+            show_priority_modal: false,
         }
+    }
+
+    // CHANGE todo Priority
+    fn change_priority(
+        &mut self,
+        id: i32,
+        priority: String,
+    ) -> Result<(), Box<dyn std::error::Error>> {
+        let db = database::DBtodo::new()?;
+        db.update_priority(id, priority.clone())?;
+
+        // Find the todo by ID instead of using ID as index
+        if let Some(todo) = self.todos.iter_mut().find(|t| t.id == id as usize) {
+            todo.priority = priority;
+        }
+
+        Ok(())
+    }
+
+    fn handle_priority_change(&mut self, priority: &str) -> Result<(), Box<dyn std::error::Error>> {
+        if let Some(selected) = self.state.selected() {
+            if selected < self.todos.len() {
+                let id = self.todos[selected].id;
+                self.show_priority_modal = false;
+                self.change_priority(id as i32, priority.to_string())?;
+            } else {
+                return Err("Selected index out of bounds!".into());
+            }
+        }
+        Ok(())
     }
 
     // CHANGE TODO STATUS
@@ -146,6 +178,7 @@ impl App {
     fn close_modal(&mut self) {
         self.show_modal = false;
         self.selected_todo = None;
+        self.show_priority_modal = false;
     }
 }
 
@@ -210,6 +243,32 @@ async fn main() -> Result<(), io::Error> {
                         }
                     }
 
+                    // SHOW PRIORITY MODAL
+                    KeyCode::Char('P') => {
+                        if let Some(selected) = app.state.selected() {
+                            if selected < app.todos.len() {
+                                app.show_priority_modal = true;
+                            }
+                        }
+                    }
+
+                    // Handle priority changes
+                    KeyCode::Char('L') => {
+                        if let Err(e) = app.handle_priority_change("Low") {
+                            eprintln!("Error updating priority: {}", e);
+                        }
+                    }
+                    KeyCode::Char('M') => {
+                        if let Err(e) = app.handle_priority_change("Medium") {
+                            eprintln!("Error updating priority: {}", e);
+                        }
+                    }
+                    KeyCode::Char('H') => {
+                        if let Err(e) = app.handle_priority_change("High") {
+                            eprintln!("Error updating priority: {}", e);
+                        }
+                    }
+
                     // Delete todo
                     KeyCode::Delete => {
                         if !app.todos.is_empty() {
@@ -231,15 +290,15 @@ async fn main() -> Result<(), io::Error> {
                     KeyCode::Char('q') => break,
                     KeyCode::Down | KeyCode::Char('j') => app.next(),
                     KeyCode::Up | KeyCode::Char('k') => app.previous(),
-                    KeyCode::Enter => {
+                    KeyCode::Enter | KeyCode::Char('l') => {
                         if app.show_modal {
                             app.close_modal();
                         } else {
                             app.select_current();
                         }
                     }
-                    KeyCode::Esc => {
-                        if app.show_modal {
+                    KeyCode::Esc | KeyCode::Char('h') => {
+                        if app.show_modal || app.show_priority_modal {
                             app.close_modal();
                         }
                     }

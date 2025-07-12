@@ -1,6 +1,8 @@
 use crate::App;
 use crate::arguments::models::Todo;
-use crate::modals::{centered_rect, draw_delete_confirmation, draw_todo_modal};
+use crate::modals::{
+    centered_rect, draw_delete_confirmation, draw_priority_modal, draw_todo_modal,
+};
 use ratatui::layout::Alignment;
 use ratatui::prelude::Stylize;
 use ratatui::text::Span;
@@ -29,6 +31,11 @@ pub fn draw_ui(f: &mut Frame, app: &mut App) {
     // Handle modal and delete confirmation states first
     if app.show_delete_confirmation {
         draw_delete_confirmation(f, area);
+        return;
+    }
+
+    if app.show_priority_modal {
+        draw_priority_modal(f, area);
         return;
     }
 

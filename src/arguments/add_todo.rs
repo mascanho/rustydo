@@ -31,12 +31,48 @@ pub fn add_todo(
         .to_string()
         + &priority[1..];
 
+    // Handle the owner string
     let owner = ownder.unwrap_or_else(|| "You".to_string());
+
+    // Ensure the first letter is cased if the user passed argument
+    let owner = owner
+        .chars()
+        .next()
+        .unwrap()
+        .to_ascii_uppercase()
+        .to_string()
+        + &owner[1..];
+
+    // ensure the topic is always capital cased on the first letter
+    let topic = topic
+        .chars()
+        .next()
+        .unwrap()
+        .to_ascii_uppercase()
+        .to_string()
+        + &topic[1..];
+
+    // Ensure the text first chartacter is always capital cased
+    let text = text
+        .chars()
+        .next()
+        .unwrap()
+        .to_ascii_uppercase()
+        .to_string()
+        + &text[1..];
 
     // Handle the date
     let due_date = due.unwrap_or_else(|| "-".to_string());
 
+    // Ensure the first letter is cased if the user passed argument
     let desc = desc.unwrap_or_else(|| "No description provided".to_string());
+    let desc = desc
+        .chars()
+        .next()
+        .unwrap()
+        .to_ascii_uppercase()
+        .to_string()
+        + &desc[1..];
 
     let db = DBtodo::new()?;
 

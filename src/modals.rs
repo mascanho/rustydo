@@ -163,3 +163,79 @@ pub fn draw_delete_confirmation(f: &mut Frame, area: Rect) {
 
     f.render_widget(paragraph, area);
 }
+
+// Status change confirmation
+pub fn draw_priority_modal(f: &mut Frame, area: Rect) {
+    // Purple-themed delete confirmation
+    let background = Color::Rgb(30, 15, 35);
+    let border = Color::Rgb(200, 100, 220);
+    let text_primary = Color::Rgb(230, 220, 240);
+    let text_secondary = Color::Rgb(200, 180, 220);
+
+    // Calculate dynamic size (40% of width, 25% of height)
+    let modal_area = dynamic_rect(40, 25, area);
+
+    let block = Block::default()
+        .title(" Priority Change ")
+        .borders(Borders::ALL)
+        .style(Style::default().bg(background))
+        .border_style(Style::default().fg(border).add_modifier(Modifier::BOLD));
+
+    f.render_widget(block, modal_area);
+
+    // Inner area with padding
+    let inner_area = modal_area.inner(Margin {
+        horizontal: 2,
+        vertical: 1,
+    });
+
+    let text = vec![
+        Line::from(""),
+        Line::from("Set priority for this TODO".fg(text_primary)),
+        Line::from(""),
+        Line::from(vec![
+            Span::styled(
+                "H",
+                Style::default()
+                    .fg(Color::Rgb(220, 100, 120))
+                    .add_modifier(Modifier::BOLD),
+            ),
+            Span::from(": High priority".fg(text_secondary)),
+        ]),
+        Line::from(vec![
+            Span::styled(
+                "M",
+                Style::default()
+                    .fg(Color::Rgb(220, 180, 100))
+                    .add_modifier(Modifier::BOLD),
+            ),
+            Span::from(": Medium priority".fg(text_secondary)),
+        ]),
+        Line::from(vec![
+            Span::styled(
+                "L",
+                Style::default()
+                    .fg(Color::Rgb(120, 220, 150))
+                    .add_modifier(Modifier::BOLD),
+            ),
+            Span::from(": Low priority".fg(text_secondary)),
+        ]),
+    ];
+
+    let paragraph = Paragraph::new(text)
+        .alignment(Alignment::Center)
+        .wrap(Wrap { trim: true })
+        .block(Block::default().style(Style::default().bg(background)));
+
+    f.render_widget(paragraph, inner_area);
+}
+// Dynamic sizing
+fn dynamic_rect(width_percent: u16, height_percent: u16, area: Rect) -> Rect {
+    let width = (area.width * width_percent / 100).max(10); // Ensure minimum width
+    let height = (area.height * height_percent / 100).max(8); // Ensure minimum height
+
+    let x = (area.width - width) / 2;
+    let y = (area.height - height) / 2;
+
+    Rect::new(x, y, width, height)
+}

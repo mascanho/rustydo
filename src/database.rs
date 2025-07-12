@@ -62,7 +62,7 @@ impl DBtodo {
         connection.execute(
             "CREATE TABLE IF NOT EXISTS todos (
                 id INTEGER PRIMARY KEY,
-                name TEXT NOT NULL,
+                priority TEXT NOT NULL,
                 topic TEXT,
                 text TEXT,
                 desc TEXT,
@@ -80,7 +80,7 @@ impl DBtodo {
     /// Adds a new todo to the database (better than standalone function)
     pub fn add_todo(&self, todo: &Todo) -> Result<(), Box<dyn Error>> {
         self.connection.execute(
-            "INSERT INTO todos (name, topic, text, desc, date_added, due, status, owner) 
+            "INSERT INTO todos (priority, topic, text, desc, date_added, due, status, owner) 
              VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)",
             params![
                 &todo.priority,
@@ -143,6 +143,21 @@ impl DBtodo {
             params![status, id],
         )?;
         if changes > 0 {
+            return Ok(());
+        } else {
+            println!("❌ No todo found with id: {}", id);
+        }
+        Ok(())
+    }
+
+    // UPDATE TODO PRIORITY
+    pub fn update_priority(&self, id: i32, priority: String) -> Result<(), Box<dyn Error>> {
+        let changes = self.connection.execute(
+            "UPDATE todos SET priority = ? WHERE id = ?",
+            params![priority, id],
+        )?;
+        if changes > 0 {
+            println!("✅ Todo updated successfully!");
             return Ok(());
         } else {
             println!("❌ No todo found with id: {}", id);
